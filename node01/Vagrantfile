@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
 	
 	node01.vm.network "private_network", ip: "192.168.50.10", virtualbox__intnet: "ansible-net"
 	# additional SSH 
-	node01.vm.network "forwarded_port", guest: 22, host: 10122
+	node01.vm.network "forwarded_port", protocol: "tcp", host_ip: "192.168.50.5",  host: 10122, guest_ip: "192.168.50.10", guest: 22
 	# JBOSS
 	node01.vm.network "forwarded_port", guest: 9990, host: 11090
 	node01.vm.network "forwarded_port", guest: 9999, host: 11099
