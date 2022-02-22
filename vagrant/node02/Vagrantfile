@@ -1,0 +1,27 @@
+Vagrant.configure("2") do |config|
+  config.vm.define "node02" do |node02|
+    node02.vm.box = "centos7-mini"
+	node02.vm.hostname = "node02"
+	
+	node02.vm.provider "virtualbox" do |vb|
+	  # vagrant-disksize plugin feature
+	  node02.vagrant.plugins = ['vagrant-disksize']
+	  node02.disksize.size = '10GB'
+	  vb.name = "node02"
+	  vb.memory = 512
+	  vb.cpus = 1
+	end
+	
+	node02.vm.network "private_network", ip: "192.168.50.20", virtualbox__intnet: "ansible-net"
+	# additional SSH 
+	node02.vm.network "forwarded_port", protocol: "tcp", host_ip: "192.168.50.5",  host: 10222, guest_ip: "192.168.50.20", guest: 22
+	# JBOSS
+	node02.vm.network "forwarded_port", guest_ip: "192.168.50.10", guest: 9990, host: 12090
+	node02.vm.network "forwarded_port", guest_ip: "192.168.50.10", guest: 9999, host: 12099
+	node02.vm.network "forwarded_port", guest_ip: "192.168.50.10", guest: 8080, host: 12880
+	# HTTP/HTTPS
+	node02.vm.network "forwarded_port", guest_ip: "192.168.50.10", guest: 80, host: 12080
+	node02.vm.network "forwarded_port", guest_ip: "192.168.50.10", guest: 443, host: 12043
+  end
+  
+end
