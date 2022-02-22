@@ -1,3 +1,6 @@
+# .vagrant folders
+.vagrant/
+
 # Compiled class file
 *.class
 
