@@ -1,5 +1,6 @@
 [task_1]
 node01  ansible_host=192.168.50.10
+node02  ansible_host=192.168.50.20
 
 [ALL_HOSTS:children]
 task_1
