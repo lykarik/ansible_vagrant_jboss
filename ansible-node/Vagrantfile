@@ -7,8 +7,8 @@ Vagrant.configure("2") do |config|
 	# vagrant-disksize plugin feature
 	ansiblenode.vagrant.plugins = ['vagrant-disksize']
 	ansiblenode.disksize.size = '50GB'
-	ansiblenode.vm.disk :disk, size: "50GB", primary: true
 	ansiblenode.vm.hostname = "ansiblenode"
+	# intnet for other nodes
 	ansiblenode.vm.network "private_network", ip: "192.168.50.5", virtualbox__intnet: "ansible-net"
 	
 	ansiblenode.vm.provider "virtualbox" do |v| 
@@ -17,5 +17,4 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
 	end
   end
-  
 end
