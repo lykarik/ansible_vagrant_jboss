@@ -1,0 +1,21 @@
+# need to install 'vagrant plugin install vagrant-disksize'
+
+Vagrant.configure("2") do |config|
+  
+  config.vm.define "ansiblenode" do |ansiblenode|
+    ansiblenode.vm.box = "centos7-mini"
+	# vagrant-disksize plugin feature
+	ansiblenode.vagrant.plugins = ['vagrant-disksize']
+	ansiblenode.disksize.size = '50GB'
+	ansiblenode.vm.disk :disk, size: "50GB", primary: true
+	ansiblenode.vm.hostname = "ansiblenode"
+	ansiblenode.vm.network "private_network", ip: "192.168.50.5", virtualbox__intnet: "ansible-net"
+	
+	ansiblenode.vm.provider "virtualbox" do |v| 
+	  v.name = "ansiblenode"
+      v.memory = 1024
+      v.cpus = 2
+	end
+  end
+  
+end
