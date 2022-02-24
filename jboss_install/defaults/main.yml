@@ -1,2 +1,4 @@
 ---
-# defaults file for jboss_install
+distr_name : jboss-eap-6.4.0.zip
+jboss_dir  : /u01/jboss
+

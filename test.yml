@@ -40,3 +40,12 @@
 
   - name: Start JBoss EAP
     command: "{{jboss_dir}}/jboss-eap-6.4/bin/standalone.sh -Djboss.node.name=node01 -Djboss.server.base.dir={{ jboss_dir }}/jboss-eap-6.4/standalone -b 10.32.101.199 -bmanagement 10.32.101.199"
+
+  - name: create config dir
+    file: state=directory dest=/etc/jboss-as owner=root mode=644
+
+  - name: provide startup config
+    template: src=jboss_install/template/jboss_standalone.conf.j2 dest=/etc/jboss-as/jboss-as.conf owner=root mode=644
+
+  - name: provide init.d script standalone
+    template: src=jboss_install/template/jboss_init_standalone.j2 dest=/etc/init.d/jboss-as owner=root mode=644
