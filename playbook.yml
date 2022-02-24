@@ -1,7 +1,0 @@
----
-- hosts: task_1
-  become: yes
-
-  tasks:
-    - name: PINGING
-      ping:
