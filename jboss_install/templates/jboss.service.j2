@@ -1,0 +1,14 @@
+[Unit]
+Description=JBoss EAP Systemctl script
+After=NetworkManager.service
+
+[Service]
+Type=forking
+ExecStart={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-{{node_name}}.sh start
+ExecStop={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-{{node_name}}.sh stop
+ExecReload={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-{{node_name}}.sh restart
+PIDFile=/var/run/jboss-as/jboss-as-{{node_name}}.pid
+
+[Install]
+WantedBy=multi-user.target
+
