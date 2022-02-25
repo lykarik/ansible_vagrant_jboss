@@ -1,4 +1,7 @@
 ---
 distr_name : jboss-eap-6.4.0.zip
 jboss_dir  : /u01/jboss
-
+node_name: "{{ansible_hostname}}"
+jboss_standalone_config: "standalone-full-ha.xml"
+port_offset: 0
+jboss_version: "6.4"
