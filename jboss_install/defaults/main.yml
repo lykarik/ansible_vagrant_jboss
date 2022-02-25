@@ -5,3 +5,6 @@ node_name: "{{ansible_hostname}}"
 jboss_standalone_config: "standalone-full-ha.xml"
 port_offset: 0
 jboss_version: "6.4"
+jboss_slave_pass: "{{node_name}}123!@#"
+jboss_master_host: localhost
+jboss_slaves: []
