@@ -37,12 +37,15 @@
       host: "{{inventory_hostname}}"
       state: started
       delay: 5
-      timeout: 40
+      timeout: 30
     delegate_to: 127.0.0.1
 
 #Creating user/group/folders
 
-  - name: upload JBoss EAP distr
+  - name: Upload ActiveMQ distr
+    copy: src=jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
+
+  - name: Upload JBoss EAP distr
     copy: src=jboss_install/files/jboss_eap/6.4/{{ distr_name }} dest=/tmp
 
   - name: Create JBoss group
@@ -95,5 +98,11 @@
 
   - name: Waiting service
     wait_for:
-      timeout: 60
+      timeout: 10
+# Deploy the activemq-rar-6.3.0.rar
 
+  - name: Deploying activemq-rar-6.3.0.rar
+    ignore_errors: true
+    command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='deploy /tmp/activemq-rar-6.3.0.rar'"
+    environment:
+      JAVA_HOME: "/usr/"
