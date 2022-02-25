@@ -1,4 +1,8 @@
 ---
+  - set_fact: domain_controller=True
+
+  - set_fact: standalone=True
+
   - name: PINGING
     ping:
 
@@ -68,9 +72,18 @@
 
   - name: Set permissions for dir
     shell: "chown -R jboss:jboss {{jboss_dir}}"
+  
+  - name: provide domain.xml config
+    template: src=domain.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/domain.xml owner=jboss mode=0644
+    when: domain_controller|bool
+  
+  - name: provide host-master.xml config
+    template: src=host-master.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+    when: domain_controller|bool
 
- # - name: Start JBoss EAP
- #   command: "{{jboss_dir}}/jboss-eap-6.4/bin/standalone.sh -Djboss.node.name=node01 -Djboss.server.base.dir={{ jboss_dir }}/jboss-eap-6.4/standalone -b 10.32.101.199 -bmanagement 10.32.101.199"
+  - name: provide host-slave.xml config
+    template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+    when: standalone|bool
 
 #Autostart settings
 
@@ -99,6 +112,7 @@
   - name: Waiting service
     wait_for:
       timeout: 10
+
 # Deploy the activemq-rar-6.3.0.rar
 
   - name: Deploying activemq-rar-6.3.0.rar
