@@ -2,41 +2,98 @@
   - name: PINGING
     ping:
 
-#  - debug:
-#      msg: "JBOSS INSTALL"
+  - name: INFO
+    debug:
+      msg: "JBOSS INSTALL - version {{ jboss_version }}"
 
-#  - name: upload JBoss EAP distr
-#    copy: src=jboss_install/files/jboss_eap/6.4/{{ distr_name }} dest=/tmp
+#Prepare node enviroment
 
-#  - name: install requirements
-#    yum: name={{ item }} state=installed
-#    loop:
-#       - unzip
-#       - java-1.8.0-openjdk-devel.x86_64
+  - name: Install requirements
+    yum: name={{ item }} state=installed
+    loop:
+       - unzip
+       - java-1.8.0-openjdk-devel.x86_64
 
-#  - name: create jboss group
-#    group: name=jboss state=present system=yes
+  - name: Disabling firewalld service
+    service: name=firewalld state=stopped
 
-#  - name: create jboss user
-#    user: name=jboss group=jboss system=yes
+  - name: Remove firewalld from autostart
+    service: name=firewalld enabled=no
 
-#  - name: create jboss dir
-#    file: state=directory dest={{ jboss_dir }} owner=jboss group=jboss
 
-#  - name: unzip JBoss EAP distr
-#    unarchive: copy=no src=/tmp/{{ distr_name }} dest={{ jboss_dir }}
+  - name: Disabling SELinux
+    lineinfile:
+      path: "/etc/selinux/config"
+      regexp: '^SELINUX='
+      line: SELINUX=disabled
 
-#  - name: add  jboss user
-#    command: "{{ jboss_dir }}/jboss-eap-6.4/bin/add-user.sh -u MyAdmin -p password1@ -s"
+  - name: Rebooting node
+    shell: sleep 5 & reboot now
+    async: 1
+    poll: 0
 
-#  - name: Start JBoss EAP
-#    command: "{{jboss_dir}}/jboss-eap-6.4/bin/standalone.sh -Djboss.node.name=node01 -Djboss.server.base.dir={{ jboss_dir }}/jboss-eap-6.4/standalone -b 10.32.101.199 -bmanagement 10.32.101.199"
+  - name: Wait to node wake up
+    wait_for:
+      host: "{{inventory_hostname}}"
+      state: started
+      delay: 5
+      timeout: 40
+    delegate_to: 127.0.0.1
 
-  - name: create config dir
+#Creating user/group/folders
+
+  - name: upload JBoss EAP distr
+    copy: src=jboss_install/files/jboss_eap/6.4/{{ distr_name }} dest=/tmp
+
+  - name: Create JBoss group
+    group: name=jboss state=present system=yes
+
+  - name: Create JBoss user
+    user: name=jboss group=jboss system=yes
+
+  - name: Create JBoss dir
+    file: state=directory dest={{ jboss_dir }} owner=jboss group=jboss
+
+  - name: Unzip JBoss EAP distr
+    unarchive: copy=no src=/tmp/{{ distr_name }} dest={{ jboss_dir }}
+
+  - name: Create config dir
     file: state=directory dest=/etc/jboss-as owner=root mode=644
 
-  - name: provide startup config
-    template: src=/home/vagrant/r_git/ansible_vagrant_jboss/jboss_install/template/jboss_standalone.conf.j2 dest=/etc/jboss-as/jboss-as.conf owner=root mode=644
+  - name: Add JBoss user
+    command: "{{ jboss_dir }}/jboss-eap-6.4/bin/add-user.sh -u MyAdmin -p password1@ -s"
 
-  - name: provide init.d script standalone
-    template: src=jboss_install/template/jboss_init_standalone.j2 dest=/etc/init.d/jboss-as owner=root mode=644
+  - name: Set permissions for dir
+    shell: "chown -R jboss:jboss {{jboss_dir}}"
+
+ # - name: Start JBoss EAP
+ #   command: "{{jboss_dir}}/jboss-eap-6.4/bin/standalone.sh -Djboss.node.name=node01 -Djboss.server.base.dir={{ jboss_dir }}/jboss-eap-6.4/standalone -b 10.32.101.199 -bmanagement 10.32.101.199"
+
+#Autostart settings
+
+  - name: Provide init.d script standalone for systemd
+    template: src=jboss_init_standalone.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-{{node_name}}.sh owner=root mode=0755
+
+  - name: Provide startup config
+    template: src=jboss_standalone.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=644
+
+  - name: Provide init.d script standalone
+    template: src=jboss_init_standalone.j2 dest=/etc/init.d/jboss-as-{{node_name}} owner=root mode=644
+
+  - name: Provide systemd script standalone
+    template: src=jboss.service.j2 dest=/etc/systemd/system/jboss-as-{{node_name}}.service
+
+  - name: Reload systemd daemon
+    systemd: daemon-reload=yes
+    when: ansible_service_mgr == "systemd"
+
+  - name: Add JBoss to autostart
+    service: name=jboss-as-{{node_name}} enabled=yes
+
+  - name: Start jboss
+    service: name=jboss-as-{{node_name}} state=started
+
+  - name: Waiting service
+    wait_for:
+      timeout: 60
+
