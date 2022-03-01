@@ -13,7 +13,7 @@ ExecStart={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-
 ExecStop={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-domain.sh stop
 ExecReload={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-domain.sh restart
 {% endif %}
-#PIDFile=/var/run/jboss-as/jboss-as-{{node_name}}.pid
+PIDFile=/var/run/jboss-as/jboss-as-{{node_name}}.pid
 
 [Install]
 WantedBy=multi-user.target

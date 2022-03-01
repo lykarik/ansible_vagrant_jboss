@@ -113,7 +113,7 @@
 #Autostart settings
 
 - name: provide startup config
-  template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as.conf owner=root mode=0644
+  template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=0644
   notify:
     - restart eap
   when: not standalone|bool
@@ -189,6 +189,6 @@
 
 - name: Deploying activemq-rar-6.3.0.rar
   ignore_errors: true
-  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='deploy /tmp/activemq-rar-6.3.0.rar'"
+  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller={{jboss_master_host}}:{{9999+(port_offset|int)}} -c --commands='deploy /tmp/activemq-rar-6.3.0.rar'"
   environment:
     JAVA_HOME: "/usr/"
