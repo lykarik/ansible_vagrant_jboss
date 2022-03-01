@@ -5,12 +5,22 @@
 - set_fact: standalone=False
   when: standalone is not defined
 
-- name: PINGING
-  ping:
+#- name: PINGING
+#  ping:
 
-- name: ip addr
-  debug:
-    msg: "{{jboss_bind}}"
+- name: stop jboss service
+  service: name=jboss-as state=stopped
+  when: not standalone|bool
+  ignore_errors: yes
+
+#- name: stop jboss service
+#  service: name=jboss-as-{{node_name}} state=stopped
+#  when: standalone|bool
+#  ignore_errors: yes
+
+#- name: ip addr
+#  debug:
+#    msg: "{{jboss_bind}}"
 
 - name: INFO
   debug:
@@ -18,36 +28,36 @@
 
 #Prepare node enviroment
 
-- name: Install requirements
-  yum: name={{ item }} state=installed
-  loop:
-     - unzip
-     - java-1.8.0-openjdk-devel.x86_64
+#- name: Install requirements
+#  yum: name={{ item }} state=installed
+#  loop:
+#     - unzip
+#     - java-1.8.0-openjdk-devel.x86_64
 
-- name: Disabling firewalld service
-  service: name=firewalld state=stopped
-
-- name: Remove firewalld from autostart
-  service: name=firewalld enabled=no
-
-- name: Disabling SELinux
-  lineinfile:
-    path: "/etc/selinux/config"
-    regexp: '^SELINUX='
-    line: SELINUX=disabled
-
-- name: Rebooting node
-  shell: sleep 5 & reboot now
-  async: 1
-  poll: 0
-
-- name: Wait to node wake up
-  wait_for:
-    host: "{{inventory_hostname}}"
-    state: started
-    delay: 5
-    timeout: 30
-  delegate_to: 127.0.0.1
+#- name: Disabling firewalld service
+#  service: name=firewalld state=stopped
+#
+#- name: Remove firewalld from autostart
+#  service: name=firewalld enabled=no
+#
+#- name: Disabling SELinux
+#  lineinfile:
+#    path: "/etc/selinux/config"
+#    regexp: '^SELINUX='
+#    line: SELINUX=disabled
+#
+#- name: Rebooting node
+#  shell: sleep 5 & reboot now
+#  async: 1
+#  poll: 0
+#
+#- name: Wait to node wake up
+#  wait_for:
+#    host: "{{inventory_hostname}}"
+#    state: started
+#    delay: 5
+#    timeout: 30
+#  delegate_to: 127.0.0.1
 
 #Creating user/group/folders
 
@@ -55,10 +65,10 @@
   file: path={{jboss_dir}} state=absent
 
 - name: Upload ActiveMQ distr
-  copy: src=jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
+  copy: src=roles/jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
 
 - name: Upload JBoss EAP distr
-  copy: src=jboss_install/files/jboss_eap/6.4/{{ distr_name }} dest=/tmp
+  copy: src=roles/jboss_install/files/jboss_eap/6.4/{{ distr_name }} dest=/tmp
 
 - name: Create JBoss group
   group: name=jboss state=present system=yes
@@ -103,7 +113,7 @@
 #Autostart settings
 
 - name: provide startup config
-  template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=0644
+  template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as.conf owner=root mode=0644
   notify:
     - restart eap
   when: not standalone|bool
@@ -118,7 +128,7 @@
   template: src=jboss_init.j2 dest=/etc/init.d/jboss-as owner=root mode=0755
   notify:
     - restart eap
-  when: not standalone|bool and (ansible_service_mgr == "upstart" or ansible_service_mgr == "sysvinit")
+  when: not standalone|bool 
 
 - name: provide init.d script standalone
   template: src=jboss_init_standalone.j2 dest=/etc/init.d/jboss-as-{{node_name}} owner=root mode=0755
@@ -145,7 +155,7 @@
   when: ansible_service_mgr == "systemd" and not standalone|bool
 
 - name: provide systemd script standalone
-  template: src=jboss.service.j2 dest=/etc/systemd/system/jboss-as-{{node_name}}.service
+  template: src=jboss_standalone.service.j2 dest=/etc/systemd/system/jboss-as-{{node_name}}.service
   notify:
     - restart eap
   when: ansible_service_mgr == "systemd" and standalone|bool
@@ -154,11 +164,22 @@
   systemd: daemon-reload=yes
   when: ansible_service_mgr == "systemd"
 
-- name: Add JBoss to autostart
+- name: Add JBoss to autostart STANDALONE
   service: name=jboss-as-{{node_name}} enabled=yes
+  when: standalone|bool
+
+- name: Start jboss STANDALONE
+  service: name=jboss-as-{{node_name}} state=started
+  when: standalone|bool
+
+- name: Add JBoss to autostart
+  service: name=jboss-as enabled=yes
+  when: not standalone|bool
 
 - name: Start jboss
-  service: name=jboss-as-{{node_name}} state=started
+  service: name=jboss-as state=started
+  when: not standalone|bool
+
 
 - name: Waiting service
   wait_for:
