@@ -1,0 +1,9 @@
+JBOSS_USER=jboss
+JBOSS_HOME={{jboss_dir}}/jboss-eap-{{jboss_version}}
+JBOSS_CONFIG={{jboss_standalone_config}}
+JBOSS_OPTS="-Djboss.bind.address.management=0.0.0.0 -Djboss.socket.binding.port-offset={{ port_offset|default(0) }} -Djboss.node.name={{ node_name }}"
+JBOSS_BIND={{jboss_bind | default("0.0.0.0")}}
+JBOSS_PIDFILE=/var/run/jboss-as/jboss-as-{{ node_name }}.pid
+JAVA_HOME=/usr
+JBOSS_CONSOLE_LOG=/dev/null
+JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxPermSize=1024m"

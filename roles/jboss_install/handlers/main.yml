@@ -1,0 +1,11 @@
+---
+- name: restart eap
+  service: name=jboss-as state=restarted
+  environment:
+      LANG: "en_US.UTF-8"
+
+- name: restart eap-standalone
+  service: name=jboss-as-{{node_name}} state=restarted
+  environment:
+      LANG: "en_US.UTF-8"
+

@@ -1,0 +1,15 @@
+---
+distr_name : jboss-eap-6.4.0.zip
+jboss_dir  : /u01/jboss
+node_name: "{{ansible_hostname}}"
+jboss_standalone_config: "standalone-full-ha.xml"
+port_offset: 0
+jboss_version: "6.4"
+jboss_slave_pass: "{{node_name}}123!@#"
+jboss_master_host: localhost
+jboss_master_port: 9999
+jboss_slaves: ["node01"]
+#domain_controller: True
+standalone: True
+#jboss_admin_pass: admin123!@#
+jboss_bind: "{{ansible_default_ipv4.address}}"

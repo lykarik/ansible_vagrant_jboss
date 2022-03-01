@@ -1,0 +1,130 @@
+{% if jboss_version >= 7 %}
+if (result=="DOMAIN") of /:read-attribute(name=launch-type)
+  cd /profile=full-ha
+end-if
+./subsystem=ee/service=default-bindings:undefine-attribute(name=datasource)
+if (outcome==success) of /profile=load-balancer:read-resource
+  /profile=load-balancer:remove
+end-if
+if (result=="DOMAIN") of /:read-attribute(name=launch-type)
+  /profile=full-ha/subsystem=jsf:remove()
+  /profile=full-ha/subsystem=remoting:write-attribute(name=max-inbound-channels, value=10000)
+  /profile=full-ha/subsystem=remoting:write-attribute(name=max-outbound-channels, value=10000)
+  /profile=full-ha/subsystem=remoting:write-attribute(name=max-inbound-messages, value=10000)
+  /profile=full-ha:clone(to-profile=full-ha-ejb)
+  /profile=full-ha:clone(to-profile=full-ha-rest)
+  /profile=full-ha:clone(to-profile=full-ha-web)
+  /profile=full-ha-ejb/subsystem=ejb3/strict-max-bean-instance-pool=slsb-strict-max-pool:undefine-attribute(name=derive-size)
+end-if
+{% endif %}
+
+{% if server_groups is defined %}
+  {% for sg in server_groups %}
+  if (outcome==success) of /server-group={{sg.name}}:read-resource
+      /server-group={{sg.name}}:remove
+  end-if
+  /server-group={{sg.name}}:add(socket-binding-group=full-ha-sockets, profile={{sg.profile}})
+  /server-group={{sg.name}}/jvm={{sg.jvm.name|default("jvm")}}:add(heap-size={{sg.jvm.heap|default(1024)}}m, max-heap-size={{sg.jvm.maxheap|default(1024)}}m)
+  /server-group={{sg.name}}/jvm={{sg.jvm.name|default("jvm")}}:add-jvm-option(jvm-option="-Dfile.encoding=UTF-8")
+  /server-group={{sg.name}}/jvm={{sg.jvm.name|default("jvm")}}:add-jvm-option(jvm-option="-Dsun.jnu.encoding=UTF-8")
+  /server-group={{sg.name}}/jvm={{sg.jvm.name|default("jvm")}}:add-jvm-option(jvm-option="-Djboss.as.management.blocking.timeout=750")
+  /server-group={{sg.name}}/jvm={{sg.jvm.name|default("jvm")}}:add-jvm-option(jvm-option="-Dorg.apache.activemq.SERIALIZABLE_PACKAGES=*")
+  {% if sg.jvmopts is defined %}
+    {% for opt in sg.jvmopts %}
+    /server-group={{sg.name}}/jvm={{sg.jvm.name|default("jvm")}}:add-jvm-option(jvm-option="{{opt}}")
+   {% endfor %}
+  {% endif %}
+  {% if sg.multicast is defined %}
+    /server-group={{sg.name}}/system-property=jboss.default.multicast.address:add(value="{{sg.multicast}}")
+  {% endif %}
+  {% if sg.groupaddr is defined %}
+    /server-group={{sg.name}}/system-property=jboss.messaging.group.address:add(value="{{sg.groupaddr}}")
+  {% endif %}
+  {% endfor %}
+{% endif %}
+if (outcome==success) of /server-group=cluster-group:read-resource
+/server-group=cluster-group:remove
+end-if
+
+{% if hosts is defined %}
+{% for host in hosts %}
+
+{% for server in host.servers %}
+/host={{host.name}}/server-config={{server.name}}:add(auto-start=true, group={{server.server_group}}, socket-binding-port-offset={{server.offset|default(0)}})
+{% endfor %}
+
+/host={{host.name}}/core-service=management/security-realm=ejb-security-realm:add()
+/host={{host.name}}/core-service=management/security-realm=ejb-security-realm/server-identity=secret:add(value="ZWpiMTIzIUAj")
+{% endfor %}
+{% endif %}
+
+if (result=="STANDALONE") of /:read-attribute(name=launch-type)
+./core-service=management/security-realm=ejb-security-realm:add()
+./core-service=management/security-realm=ejb-security-realm/server-identity=secret:add(value="ZWpiMTIzIUAj")
+./subsystem=deployment-scanner/scanner=default:write-attribute(name=auto-deploy-zipped, value=false)
+./subsystem=deployment-scanner/scanner=default:write-attribute(name=auto-deploy-xml, value=false)
+end-if
+
+{% if connections is defined %}
+{% for conn in connections %}
+{% for host in conn.hosts %}
+{% if loop.index == 1 %}
+if (result=="DOMAIN") of /:read-attribute(name=launch-type)
+/socket-binding-group=full-ha-sockets/remote-destination-outbound-socket-binding={{conn.binding}}:add(host={{host.host}}, port={{host.port}})
+cd /profile={{conn.profile|default("example-profile")}}
+else
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding={{conn.binding}}:add(host={{host.host}}, port={{host.port}})
+end-if
+./subsystem=remoting/remote-outbound-connection={{conn.name}}:add(outbound-socket-binding-ref={{conn.binding}}, security-realm=ejb-security-realm, username=ejb{% if conn.protocol is defined %},protocol={{conn.protocol}}{% endif %})
+./subsystem=remoting/remote-outbound-connection={{conn.name}}/property=SASL_POLICY_NOANONYMOUS:add(value=false)
+./subsystem=remoting/remote-outbound-connection={{conn.name}}/property=SSL_ENABLED:add(value=false)
+{% else %}
+if (result=="DOMAIN") of /:read-attribute(name=launch-type)
+/socket-binding-group=full-ha-sockets/remote-destination-outbound-socket-binding={{conn.binding}}-{{loop.index}}:add(host={{host.host}}, port={{host.port}})
+cd /profile={{conn.profile|default("example-profile")}}
+else
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding={{conn.binding}}-{{loop.index}}:add(host={{host.host}}, port={{host.port}})
+end-if
+./subsystem=remoting/remote-outbound-connection={{conn.name}}-{{loop.index}}:add(outbound-socket-binding-ref={{conn.binding}}-{{loop.index}}, security-realm=ejb-security-realm, username=ejb)
+./subsystem=remoting/remote-outbound-connection={{conn.name}}-{{loop.index}}/property=SASL_POLICY_NOANONYMOUS:add(value=false)
+./subsystem=remoting/remote-outbound-connection={{conn.name}}-{{loop.index}}/property=SSL_ENABLED:add(value=false)
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+if (result=="DOMAIN") of /:read-attribute(name=launch-type)
+/profile=full-ha-web/subsystem=web:write-attribute(name=instance-id, value="${jboss.host.name}")
+/profile=full-ha-web/subsystem=web/connector=https/:add(socket-binding=https, scheme=https, secure="true", protocol="HTTP/1.1")
+/profile=full-ha-web/subsystem=web/connector=https/ssl=configuration:add(name="https", key-alias="oiosaml", password="123qweASD", certificate-key-file="/home/jboss/oiosaml.java-config/certificate/keystore")
+end-if
+
+if (outcome==success) of /host={{ansible_hostname}}/core-service=vault:read-resource
+/host={{ansible_hostname}}/core-service=vault:remove
+end-if
+if (outcome!=success) of /host={{ansible_hostname}}/core-service=vault:read-resource
+/host={{ansible_hostname}}/core-service=vault:add(vault-options=[("KEYSTORE_URL" => "/home/jboss/vault/vault.keystore"), ("KEYSTORE_PASSWORD" => "MASK-2nmZvu7uQidPfakGKQSLKD"), ("KEYSTORE_ALIAS" => "vault"), ("SALT" => "12345678"),("ITERATION_COUNT" => "50"), ("ENC_FILE_DIR" => "/home/jboss/vault/")])
+end-if
+
+if (outcome==success) of /profile=full-ha-rest/subsystem=messaging:read-resource
+/profile=full-ha-rest/subsystem=messaging:remove()
+end-if
+if (outcome==success) of /profile=full-ha-ejb/subsystem=messaging:read-resource
+/profile=full-ha-ejb/subsystem=messaging:remove()
+end-if
+if (outcome==success) of /profile=full-ha-web/subsystem=messaging:read-resource
+/profile=full-ha-web/subsystem=messaging:remove()
+end-if
+if (outcome==success) of /profile=full-ha/subsystem=messaging:read-resource
+/profile=full-ha/subsystem=messaging:remove()
+end-if
+if (outcome==success) of /profile=full-ha-ext/subsystem=messaging:read-resource
+/profile=full-ha-ext/subsystem=messaging:remove()
+end-if
+
+{% if server_groups is defined %}
+  {% for sg in server_groups %}
+  /server-group={{sg.name}}:start-servers
+  {% endfor %}
+{% endif %}
+
