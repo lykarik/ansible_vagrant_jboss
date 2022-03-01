@@ -7,8 +7,8 @@
   when: domain_controller|bool
 
 - name: Create servers and server group
-  command: "{{jbdir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|default(0))}} -c --file=/tmp/config.cli"
+  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=127.0.0.1:{{9999+(port_offset|default(0))}} -c --file=/tmp/config.cli"
   when: domain_controller|bool or standalone|bool
   environment:
-      JAVA_HOME: "/opt/jdk/last/"
+      JAVA_HOME: "/usr/"
   ignore_errors: true
