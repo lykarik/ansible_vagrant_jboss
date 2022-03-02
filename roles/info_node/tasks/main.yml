@@ -1,0 +1,16 @@
+---
+- name: stop jboss service
+  service: name=jboss-as state=stopped
+  ignore_errors: yes
+
+- name: stop jboss service
+  service: name=jboss-as-{{node_name}} state=stopped
+  ignore_errors: yes
+
+- name: ip addr
+  debug:
+    msg: "{{ansible_all_ipv4_addresses[0]}}/{{jboss_bind}}"
+
+- name: my job is
+  debug:
+    msg: "JBOSS INSTALL - version {{jboss_version}}"

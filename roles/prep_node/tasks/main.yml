@@ -1,0 +1,31 @@
+---
+- name: Install requirements
+  yum: name={{ item }} state=installed
+  loop:
+    - unzip
+    - java-1.8.0-openjdk-devel.x86_64
+
+- name: Disabling firewalld service
+  service: name=firewalld state=stopped
+
+- name: Remove firewalld from autostart
+  service: name=firewalld enabled=no
+
+- name: Disabling SELinux
+  lineinfile:
+   path: "/etc/selinux/config"
+   regexp: '^SELINUX='
+   line: SELINUX=disabled
+
+- name: Rebooting node
+  shell: sleep 5 & reboot now
+  async: 1
+  poll: 0
+
+- name: Wait to node wake up
+  wait_for:
+    host: "{{inventory_hostname}}"
+    state: started
+    delay: 5
+    timeout: 30
+  delegate_to: 127.0.0.1
