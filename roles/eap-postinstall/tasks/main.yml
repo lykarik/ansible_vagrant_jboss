@@ -1,14 +1,7 @@
 ---
-- set_fact: domain_controller=False
-  when: domain_controller is not defined
-
 - name: Create config.cli on server
   template: src=config.cli.j2 dest=/tmp/config.cli owner=jboss group=jboss
-  when: domain_controller|bool
 
 - name: Create servers and server group
-  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=127.0.0.1:{{9999+(port_offset|default(0))}} -c --file=/tmp/config.cli"
-  when: domain_controller|bool or standalone|bool
-  environment:
-      JAVA_HOME: "/usr/"
+  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller={{jboss_bind}}:{{9999+(port_offset|default(0))}} -c --file=/tmp/config.cli"
   ignore_errors: true
