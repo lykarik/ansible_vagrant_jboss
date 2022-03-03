@@ -68,7 +68,7 @@
   copy: src=roles/jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
 
 - name: Upload JBoss EAP distr
-  copy: src=roles/jboss_install/files/jboss_eap/6.4/{{ distr_name }} dest=/tmp
+  copy: src=roles/jboss_install/files/jboss_eap/6.4/{{ distr_name }}.0.zip dest=/tmp
 
 - name: Create JBoss group
   group: name=jboss state=present system=yes
@@ -80,7 +80,7 @@
   file: state=directory dest={{ jboss_dir }} owner=jboss group=jboss
 
 - name: Unzip JBoss EAP distr
-  unarchive: copy=no src=/tmp/{{ distr_name }} dest={{ jboss_dir }}
+  unarchive: copy=no src=/tmp/{{ distr_name }}.0.zip dest={{ jboss_dir }}
 
 - name: Create config dir
   file: state=directory dest=/etc/jboss-as owner=root mode=644

@@ -1,63 +1,101 @@
 ---
 #*********************************************************************
-- name: upload jboss files
-  copy: src={{item}} dest=/tmp
-  loop:
-    - "{{files}}/jboss_eap/6.4/jboss-eap-6.4.0.zip"
-    - "{{files}}/activemq/6.3/activemq-rar-6.3.0.rar"
-    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.9-patch.zip"
-    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.19-patch.zip"
-    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.20-patch.zip"
+#- name: upload jboss files
+#  copy: src={{item}} dest=/tmp
+#  loop:
+#    - "{{files}}/jboss_eap/6.4/jboss-eap-6.4.0.zip"
+#    - "{{files}}/activemq/6.3/activemq-rar-6.3.0.rar"
+#    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.9-patch.zip"
+#    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.19-patch.zip"
+#    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.20-patch.zip"
 #*********************************************************************
 
+- name: stop jboss service
+  service: name=jboss-as state=stopped
+  ignore_errors: yes
 
+- name: Remove jboss dir
+  file: path={{jboss_dir}} state=absent
 
-- name: create jboss system group
+- name: Upload ActiveMQ distr
+  copy: src=roles/jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
+
+- name: Upload JBoss EAP distr
+  copy: src=roles/jboss_install/files/jboss_eap/6.4/{{ distr_name }}.0.zip dest=/tmp
+
+- name: Create JBoss group
   group: name=jboss state=present system=yes
 
-- name: create jboss system user
+- name: Create JBoss user
   user: name=jboss group=jboss system=yes
 
-- name: create jboss dir
-  file: state=directory dest={{jboss_dir}} owner=jboss group=jboss
+- name: Create JBoss dir
+  file: state=directory dest={{ jboss_dir }} owner=jboss group=jboss
 
-- name: unzip jboss to jboss dir
-  unarchive: copy=no src=/tmp/{{distr_name}} dest={{jboss_dir}}
+- name: Unzip JBoss EAP distr
+  unarchive: copy=no src=/tmp/{{ distr_name }}.0.zip dest={{ jboss_dir }}
 
+- name: Create config dir
+  file: state=directory dest=/etc/jboss-as owner=root mode=644
 
+- name: Add JBoss admin user
+  command: "{{ jboss_dir }}/jboss-eap-6.4/bin/add-user.sh -u MyAdmin -p password1@ -s"
+
+- name: add users for slaves
+  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/add-user.sh -u {{item}} -p {{item}}123!@# -s"
+  with_items: "{{jboss_slaves}}"
+  environment:
+      JAVA_HOME: "/usr/"
+  loop: "{{jboss_masters}}"
+  when: item == "{{node_name}}"
+
+- name: Set permissions for dir
+  shell: "chown -R jboss:jboss {{jboss_dir}}"
+
+- name: provide domain.xml config
+  template: src=domain.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/domain.xml owner=jboss mode=0644
+
+- name: provide host-master.xml config
+  template: src=host-master.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+  loop: "{{jboss_masters}}"
+  when: item == "{{node_name}}"
+
+- name: provide host-slave.xml config
+  template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+  loop: "{{jboss_slaves}}"
+  when: item == "{{node_name}}"
+  
 
 - name: provide startup config
   template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=0644
+  notify:
+    - restart eap
 
 - name: provide init.d script domain
   template: src=jboss_init.j2 dest=/etc/init.d/jboss-as owner=root mode=0755
+  notify:
+    - restart eap
 
 - name: provide init.d script domain for systemd
   template: src=jboss_init.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-domain.sh owner=root mode=0755
+  notify:
+    - restart eap
 
 - name: provide systemd script
   template: src=jboss.service.j2 dest=/etc/systemd/system/jboss-as.service
+  notify:
+    - restart eap
 
 - name: Reload systemd daemon
   systemd: daemon-reload=yes
+  when: ansible_service_mgr == "systemd"
 
 - name: Add JBoss to autostart
   service: name=jboss-as enabled=yes
-  when: not standalone|bool
 
 - name: Start jboss
   service: name=jboss-as state=started
-  when: not standalone|bool
-
+  
 - name: Waiting service
   wait_for:
     timeout: 10
-
-# Deploy the activemq-rar-6.3.0.rar
-
-#- name: Deploying activemq-rar-6.3.0.rar
-#  ignore_errors: true
-#  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller={{jboss_master_host}}:{{9999+(port_offset|int)}} -c --commands='deploy /tmp/activemq-rar-6.3.0.rar'"
-#  environment:
-#    JAVA_HOME: "/usr/"
-
