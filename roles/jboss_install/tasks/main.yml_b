@@ -1,0 +1,98 @@
+---
+#*********************************************************************
+- name: upload jboss files
+  copy: src={{item}} dest=/tmp
+  loop:
+    - "{{files}}/jboss_eap/6.4/jboss-eap-6.4.0.zip"
+    - "{{files}}/activemq/6.3/activemq-rar-6.3.0.rar"
+    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.9-patch.zip"
+    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.19-patch.zip"
+    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.20-patch.zip"
+#*********************************************************************
+
+- name: remove jboss dir
+  file: name={{jboss_dir}} state=absent
+
+- name: create jboss system group
+  group: name=jboss state=present system=yes
+
+- name: create jboss system user
+  user: name=jboss group=jboss system=yes
+
+- name: create jboss dir
+  file: state=directory dest={{jboss_dir}} owner=jboss group=jboss
+
+- name: permissions for jboss dir
+  command: chown -R jboss:jboss {{jboss_dir}}
+
+- name: unzip jboss to jboss dir
+  unarchive: copy=no src=/tmp/{{distr_name}}.0.zip dest={{jboss_dir}}
+
+
+- name: provide domain.xml to jboss dir
+  template: src=domain.xml.j2 dest={{jboss_dir}}/{{distr_name}}/domain/configuration/domain.xml owner=jboss mode=0644
+
+- name: provide host-master.xml to jboss dir
+  template: src=host-master.xml.j2 dest={{jboss_dir}}/{{distr_name}}/domain/configuration/host.xml owner=jboss mode=0644
+  loop: "{{jboss_masters}}"
+  when: item == "{{node_name}}"
+
+
+- name: provide host-slave.xml to jboss dir
+  template: src=host-slave.xml.j2 dest={{jboss_dir}}/{{distr_name}}/domain/configuration/host.xml owner=jboss mode=0644
+  loop: "{{jboss_slaves}}"
+  when: item == "{{node_name}}"
+
+- name: create MASTER jboss user
+  command: "{{jboss_dir}}/{{distr_name}}/bin/add-user.sh -u {{jboss_master}} -p {{jboss_master_pass}} -s"
+
+- name: create config dir
+  file: state=directory dest=/etc/jboss-as owner=root mode=644
+
+- name: provide startup config
+  template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=0644
+  notify:
+    - restart eap
+
+- name: provide init.d script domain
+  template: src=jboss_init.j2 dest=/etc/init.d/jboss-as owner=root mode=0755
+  notify:
+    - restart eap
+
+- name: provide init.d script domain for systemd
+  template: src=jboss_init.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-domain.sh owner=root mode=0755
+  notify:
+    - restart eap
+ 
+- name: provide systemd script
+  template: src=jboss.service.j2 dest=/etc/systemd/system/jboss-as.service
+  notify:
+    - restart eap
+
+- name: disabling jboss autostart
+  service: name=jboss-as enabled=no
+
+- name: Add JBoss to autostart
+  service: name=jboss-as enabled=yes
+
+
+- name: Reload systemd daemon
+  command: systemctl daemon-reload
+  #systemd: daemon-reload=yes
+  when: ansible_service_mgr == "systemd"
+
+- name: Start jboss
+  service: name=jboss-as state=started
+
+- name: Waiting service
+  wait_for:
+    timeout: 10
+
+# Deploy the activemq-rar-6.3.0.rar
+
+#- name: Deploying activemq-rar-6.3.0.rar
+#  ignore_errors: true
+#  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller={{jboss_master_host}}:{{9999+(port_offset|int)}} -c --commands='deploy /tmp/activemq-rar-6.3.0.rar'"
+#  environment:
+#    JAVA_HOME: "/usr/"
+
