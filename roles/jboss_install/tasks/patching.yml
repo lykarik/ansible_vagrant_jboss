@@ -1,0 +1,11 @@
+---
+- name: Copy patches to host
+  copy: src={{files}}/jboss_eap/6.4/patches/jboss-eap-{{item}}-patch.zip dest=/tmp/
+  with_items:
+    - "{{jboss_patches}}"
+
+- name: Patching domain
+  ignore_errors: true
+  shell: "{{jboss_dir}}/{{distr_name}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='patch apply /tmp/jboss-eap-{{item}}-patch.zip --host={{node_name}}, shutdown --restart=true --host={{node_name}}' ; sleep 300"
+  with_items:
+    - "{{jboss_patches}}"
