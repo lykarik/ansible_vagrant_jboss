@@ -3,7 +3,7 @@
   yum: name={{ item }} state=installed
   loop:
     - unzip
-    - java-1.8.0-openjdk-devel.x86_64
+#    - java-1.8.0-openjdk-devel.x86_64
 
 - name: Disabling firewalld service
   service: name=firewalld state=stopped

@@ -1,11 +1,30 @@
 ---
-- name: Copy patches to host
-  copy: src={{files}}/jboss_eap/6.4/patches/jboss-eap-{{item}}-patch.zip dest=/tmp/
-  with_items:
-    - "{{jboss_patches}}"
+- name: Clear /tmp folder
+  shell: "rm -rf /tmp/*"
 
-- name: Patching domain
+- name: Copy patches to host
+  copy: src={{files}}/jboss_eap/6.4/patches/jboss-eap-{{jboss_patches[0]}}-patch.zip dest=/tmp/
+
+- name: Patching domain to 6.4.9
   ignore_errors: true
-  shell: "{{jboss_dir}}/{{distr_name}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='patch apply /tmp/jboss-eap-{{item}}-patch.zip --host={{node_name}}, shutdown --restart=true --host={{node_name}}' ; sleep 300"
-  with_items:
-    - "{{jboss_patches}}"
+  shell: "{{jboss_dir}}/{{distr_name}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='patch apply /tmp/jboss-eap-{{jboss_patches[0]}}-patch.zip --host={{node_name}}, shutdown --restart=true --host={{node_name}}' && sleep 120"
+
+- name: Clear /tmp folder
+  shell: "rm -rf /tmp/*"
+
+- name: Copy patches to host
+  copy: src={{files}}/jboss_eap/6.4/patches/jboss-eap-{{jboss_patches[1]}}-patch.zip dest=/tmp/
+
+- name: Patching domain to 6.4.19
+  ignore_errors: true
+  shell: "{{jboss_dir}}/{{distr_name}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='patch apply /tmp/jboss-eap-{{jboss_patches[1]}}-patch.zip --host={{node_name}}, shutdown --restart=true --host={{node_name}}' && sleep 120"
+
+- name: Clear /tmp folder
+  shell: "rm -rf /tmp/*"
+
+- name: Copy patches to host
+  copy: src={{files}}/jboss_eap/6.4/patches/jboss-eap-{{jboss_patches[2]}}-patch.zip dest=/tmp/
+
+- name: Patching domain to 6.4.20
+  ignore_errors: true
+  shell: "{{jboss_dir}}/{{distr_name}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='patch apply /tmp/jboss-eap-{{jboss_patches[2]}}-patch.zip --host={{node_name}}, shutdown --restart=true --host={{node_name}}' && sleep 120"
