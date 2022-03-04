@@ -1,18 +1,27 @@
-Vagrant.configure("2") do |config|
-    config.vm.box = "centos7-mini"
-    config.vm.hostname = "node01"
-    config.vm.network :public_network, ip: ""
-    config.vm.provision "shell",
-      run: "always",
-      inline: "route -A inet6 add default gw 192.168.88.1"
+nodes = [
+  { :hostname => 'node01', :box => 'centos7-mini' },
+  { :hostname => 'node02', :box => 'centos7-mini' }
+]
 
-    config.vm.provider :virtualbox do |vb|
-      vb.customize [
-          "modifyvm", :id,
-          "--name", "node01",
-          "--cpuexecutioncap", "50",
-          "--memory", "512",
+Vagrant.configure("2") do |config|
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = node[:box]
+      nodeconfig.vm.hostname = node[:hostname]
+      nodeconfig.vm.network :public_network, ip: ""
+      nodeconfig.vm.provision "shell",
+        run: "always",
+        inline: "sudo yum install unzip java-1.8.0-openjdk.x86_64 -y && ip a"
+
+      nodeconfig.vm.provider :virtualbox do |vb|
+        vb.customize [
+            "modifyvm", :id,
+            "--name", node[:hostname],
+	    "--cpus", "1",
+            "--memory", "1024",
         ]
+      end
+    end
   end
 end
 
