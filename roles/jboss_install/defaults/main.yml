@@ -5,11 +5,12 @@ node_name: "{{ansible_hostname}}"
 jboss_dir: "/opt/{{node_name}}"
 port_offset: 0
 jboss_version: "6.4"
+jboss_patches: ["6.4.9", "6.4.19", "6.4.20"]
 #====================================================
 jboss_master: admin
 jboss_master_pass: admin123!@#
 jboss_masters: ["node02"]
-jboss_master_host: "{{ansible_all_ipv4_addresses[0]}}"
+jboss_master_host: "{{ansible_all_ipv4_addresses[1]}}"
 jboss_master_port: 9999
 #====================================================
 jboss_slaves: ["node01"]

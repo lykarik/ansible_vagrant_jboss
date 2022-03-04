@@ -1,9 +1,9 @@
 ---
 #*********************************************************************
-#- name: upload jboss files
-#  copy: src={{item}} dest=/tmp
-#  loop:
-#    - "{{files}}/jboss_eap/6.4/jboss-eap-6.4.0.zip"
+- name: upload jboss files
+  copy: src={{item}} dest=/tmp
+  loop:
+    - "{{files}}/jboss_eap/6.4/jboss-eap-6.4.0.zip"
 #    - "{{files}}/activemq/6.3/activemq-rar-6.3.0.rar"
 #    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.9-patch.zip"
 #    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.19-patch.zip"
@@ -41,47 +41,47 @@
 - name: Add JBoss admin user
   command: "{{ jboss_dir }}/jboss-eap-6.4/bin/add-user.sh -u MyAdmin -p password1@ -s"
 
-- name: add users for slaves
+- name: Add users for slaves
   command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/add-user.sh -u {{item}} -p {{item}}123!@# -s"
   with_items: "{{jboss_slaves}}"
   environment:
       JAVA_HOME: "/usr/"
-  loop: "{{jboss_masters}}"
+  loop: "{{jboss_slaves}}"
   when: item == "{{node_name}}"
 
 - name: Set permissions for dir
   shell: "chown -R jboss:jboss {{jboss_dir}}"
 
-- name: provide domain.xml config
+- name: Provide domain.xml config
   template: src=domain.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/domain.xml owner=jboss mode=0644
 
-- name: provide host-master.xml config
+- name: Provide host-master.xml config
   template: src=host-master.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
-  loop: "{{jboss_masters}}"
-  when: item == "{{node_name}}"
+#  loop: "{{jboss_masters}}"
+#  when: item == "{{node_name}}"
 
-- name: provide host-slave.xml config
-  template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
-  loop: "{{jboss_slaves}}"
-  when: item == "{{node_name}}"
+#- name: provide host-slave.xml config
+#  template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+#  loop: "{{jboss_slaves}}"
+#  when: item == "{{node_name}}"
   
 
-- name: provide startup config
+- name: Provide startup config
   template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=0644
   notify:
     - restart eap
 
-- name: provide init.d script domain
+- name: Provide init.d script domain
   template: src=jboss_init.j2 dest=/etc/init.d/jboss-as owner=root mode=0755
   notify:
     - restart eap
 
-- name: provide init.d script domain for systemd
+- name: Provide init.d script domain for systemd
   template: src=jboss_init.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-domain.sh owner=root mode=0755
   notify:
     - restart eap
 
-- name: provide systemd script
+- name: Provide systemd script
   template: src=jboss.service.j2 dest=/etc/systemd/system/jboss-as.service
   notify:
     - restart eap
@@ -96,6 +96,14 @@
 - name: Start jboss
   service: name=jboss-as state=started
   
-- name: Waiting service
+- name: Waiting after service start
   wait_for:
-    timeout: 10
+    timeout: 5
+
+- name: Patching to final ver.
+  include: patching.yml
+
+- name: Waiting after patching
+  wait_for:
+    timeout: 5
+
