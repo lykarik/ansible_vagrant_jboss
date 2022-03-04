@@ -1,54 +1,18 @@
 Vagrant.configure("2") do |config|
-  config.vm.define "node01" do |node01|
-    node01.vm.box = "centos7-mini"
-	node01.vm.hostname = "node01"
-	
-	node01.vm.provider "virtualbox" do |vb|
-	  # vagrant-disksize plugin feature
-	  node01.vagrant.plugins = ['vagrant-disksize']
-	  node01.disksize.size = '10GB'
-	  vb.name = "node01"
-	  vb.memory = 1024
-	  vb.cpus = 1
-	end
-	
-	node01.vm.network "private_network", ip: "192.168.50.10", virtualbox__intnet: "ansible-net"
-	node01.vm.network "public_network", bridge: "Realtek PCIe GbE Family Controller #2"
-	# additional SSH 
-	node01.vm.network "forwarded_port", protocol: "tcp", host_ip: "192.168.50.5",  host: 10122, guest_ip: "192.168.50.10", guest: 22
-	# JBOSS
-	node01.vm.network "forwarded_port", guest: 9990, host: 11090
-	node01.vm.network "forwarded_port", guest: 9999, host: 11099
-	node01.vm.network "forwarded_port", guest: 8080, host: 11880
-	# HTTP/HTTPS
-	node01.vm.network "forwarded_port", guest: 80, host: 11080
-	node01.vm.network "forwarded_port", guest: 443, host: 11043
+    config.vm.box = "centos7-mini"
+    config.vm.hostname = "node01"
+    config.vm.network :public_network, ip: ""
+    config.vm.provision "shell",
+      run: "always",
+      inline: "route -A inet6 add default gw 192.168.88.1"
+
+    config.vm.provider :virtualbox do |vb|
+      vb.customize [
+          "modifyvm", :id,
+          "--name", "node01",
+          "--cpuexecutioncap", "50",
+          "--memory", "512",
+        ]
   end
-  
-  config.vm.define "node02" do |node02|
-    node02.vm.box = "centos7-mini"
-	node02.vm.hostname = "node02"
-	
-	node02.vm.provider "virtualbox" do |vb|
-	  # vagrant-disksize plugin feature
-	  node02.vagrant.plugins = ['vagrant-disksize']
-	  node02.disksize.size = '10GB'
-	  vb.name = "node02"
-	  vb.memory = 1024
-	  vb.cpus = 1
-	end
-	
-	node02.vm.network "private_network", ip: "192.168.50.20", virtualbox__intnet: "ansible-net"
-	node02.vm.network "public_network", bridge: "Realtek PCIe GbE Family Controller #2"
-	# additional SSH 
-	node02.vm.network "forwarded_port", protocol: "tcp", host_ip: "192.168.50.5",  host: 10222, guest_ip: "192.168.50.10", guest: 22
-	# JBOSS
-	node02.vm.network "forwarded_port", guest: 9990, host: 12090
-	node02.vm.network "forwarded_port", guest: 9999, host: 12099
-	node02.vm.network "forwarded_port", guest: 8080, host: 12880
-	# HTTP/HTTPS
-	node02.vm.network "forwarded_port", guest: 80, host: 12080
-	node02.vm.network "forwarded_port", guest: 443, host: 12043
-  end
-  
 end
+
