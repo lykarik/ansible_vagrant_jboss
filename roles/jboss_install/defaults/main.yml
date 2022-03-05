@@ -14,7 +14,7 @@ jboss_master_host: "{{ansible_all_ipv4_addresses[1]}}"
 jboss_master_port: 9999
 #====================================================
 jboss_slaves: ["node01"]
-jboss_slave_pass: "{{node_name}}123!@#"
+jboss_slave_pass: "password1@"
 #====================================================
 domain_controller: True
 #standalone: True

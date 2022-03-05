@@ -1,22 +1,26 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<host name="{{node_name}}" xmlns="urn:jboss:domain:1.5">
+<!--
+   A simple configuration for a Host Controller that only acts as the master domain controller
+   and does not itself directly control any servers.
+-->
+<host name="{{node_name}}" xmlns="urn:jboss:domain:1.7">
 
     <management>
         <security-realms>
             <security-realm name="ManagementRealm">
                 <authentication>
-                    <local default-user="$local" />
+                    <local default-user="$local" skip-group-loading="true" />
                     <properties path="mgmt-users.properties" relative-to="jboss.domain.config.dir"/>
                 </authentication>
                 <authorization map-groups-to-roles="false">
                     <properties path="mgmt-groups.properties" relative-to="jboss.domain.config.dir"/>
-                </authorization>                
+                </authorization>
             </security-realm>
             <security-realm name="ApplicationRealm">
                 <authentication>
-                    <local default-user="$local" allowed-users="*" />
-                    <properties path="application-users.properties" relative-to="jboss.domain.config.dir" />
+                     <local default-user="$local" allowed-users="*" skip-group-loading="true" />
+                     <properties path="application-users.properties" relative-to="jboss.domain.config.dir" />
                 </authentication>
                 <authorization>
                     <properties path="application-roles.properties" relative-to="jboss.domain.config.dir"/>
@@ -44,10 +48,10 @@
         </audit-log>
         <management-interfaces>
             <native-interface security-realm="ManagementRealm">
-                <socket interface="management" port="${jboss.management.native.port:{{9999+port_offset|default(0)}}}"/>
+                <socket interface="management" port="${jboss.management.native.port:9999}"/>
             </native-interface>
-			<http-interface security-realm="ManagementRealm">
-                <socket interface="management" port="${jboss.management.http.port:{{9990+port_offset|default(0)}}}"/>
+            <http-interface security-realm="ManagementRealm">
+                <socket interface="management" port="${jboss.management.http.port:9990}"/>
             </http-interface>
         </management-interfaces>
     </management>
@@ -60,26 +64,17 @@
         <interface name="management">
             <inet-address value="${jboss.bind.address.management:0.0.0.0}"/>
         </interface>
-        <interface name="public">
-           <inet-address value="${jboss.bind.address:0.0.0.0}"/>
-        </interface>
-        <interface name="unsecure">
-            <!-- Used for IIOP sockets in the standard configuration.
-                 To secure JacORB you need to setup SSL -->
-            <inet-address value="${jboss.bind.address.unsecure:0.0.0.0}"/>
-        </interface>
     </interfaces>
 
     <jvms>
-   	   <jvm name="default">
+           <jvm name="default">
             <heap size="64m" max-size="256m"/>
             <permgen size="256m" max-size="256m"/>
               <jvm-options>
                   <option value="-server"/>
               </jvm-options>
          </jvm>
-   	</jvms>
-	
-	<servers>
-	</servers>
+        </jvms>
+
 </host>
+

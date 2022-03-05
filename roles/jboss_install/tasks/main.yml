@@ -57,13 +57,13 @@
 
 - name: Provide host-master.xml config
   template: src=host-master.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
-#  loop: "{{jboss_masters}}"
-#  when: item == "{{node_name}}"
+  loop: "{{jboss_masters}}"
+  when: item == "{{node_name}}"
 
-#- name: provide host-slave.xml config
-#  template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
-#  loop: "{{jboss_slaves}}"
-#  when: item == "{{node_name}}"
+- name: provide host-slave.xml config
+  template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+  loop: "{{jboss_slaves}}"
+  when: item == "{{node_name}}"
   
 
 - name: Provide startup config
