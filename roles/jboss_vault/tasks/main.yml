@@ -1,0 +1,8 @@
+---
+- name: create vault directory
+  file: path=/home/jboss/vault state=directory owner=jboss group=jboss
+
+- name: copy vault files
+  copy: src={{item}} dest=/home/jboss/vault/ owner=jboss group=jboss
+  with_fileglob:
+    - "{{vault}}/*"
