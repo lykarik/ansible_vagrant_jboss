@@ -1,0 +1,13 @@
+---
+- name: provide host-slave.xml config
+  template: src=roles/jboss_install/templates/host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
+  notify:
+    restart eap
+
+#- name: Provide config.cli on server
+#  template: src=roles/eap-postinstall/templates/config.cli.j2 dest=/tmp/config.cli owner=jboss group=jboss
+
+#- name: Create servers and server group
+#  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|default(0))}} -c --file=/tmp/config.cli"
+#  ignore_errors: true
+
