@@ -1,0 +1,98 @@
+---
+server_groups: [
+{
+    name: cluster-group-rest,
+    profile: full-ha-rest,
+    jvm: {name: rest, heap: 1024, maxheap: 4096},
+    system_properties: [
+        {name: jboss.jgroups.udp.mport, value: 45688, boot: True},
+        {name: jboss.jgroups.mping.mport, value: 45700, boot: True}
+    ]
+},
+{
+    name: cluster-group-ejb,
+    profile: full-ha-ejb,
+    jvm: {name: ejb, heap: 1024, maxheap: 8192},
+    system_properties: [
+        {name: jboss.jgroups.udp.mport, value: 45687, boot: True},
+        {name: jboss.jgroups.mping.mport, value: 45701, boot: True}
+    ]
+},
+{
+    name: cluster-group-web,
+    profile: full-ha-web,
+    jvm: {name: web, heap: 1024, maxheap: 1024},
+    system_properties: [
+        {name: jboss.jgroups.udp.mport, value: 45686, boot: True},
+        {name: jboss.jgroups.mping.mport, value: 45702, boot: True}
+    ]
+},
+{
+    name: cluster-group-ext,
+    profile: full-ha-ext,
+    jvm: {name: ext, heap: 1024, maxheap: 8192},
+    system_properties: [
+        {name: jboss.jgroups.udp.mport, value: 45685, boot: True},
+        {name: jboss.jgroups.mping.mport, value: 45703, boot: True}
+    ]
+},
+{
+    name: standalone-group-tm,
+    profile: full-ha-ejb,
+    jvm: {name: tm, heap: 1024, maxheap: 1024},
+    system_properties: [
+        {name: jboss.jgroups.udp.mport, value: 45684, boot: True},
+        {name: jboss.jgroups.mping.mport, value: 45704, boot: True}
+    ]
+}
+]
+hosts: [
+{
+    name: "{{ansible_hostname}}",
+    servers: [
+        {name: rest1, server_group: cluster-group-rest},
+        {name: ejb1, server_group: cluster-group-ejb, offset: 1000},
+        {name: web1, server_group: cluster-group-web, offset: 2000},
+        {name: ext1, server_group: cluster-group-ext, offset: 3000},
+        {name: tm1, server_group: standalone-group-tm, offset: 1550}
+    ]
+}
+]
+connections: [
+{
+    name: remote-ejb-connection,
+    binding: remote-ejb,
+    profile: full-ha-rest,
+    hosts: [{host: "${jboss.bind.address.private:127.0.0.1}", port: 9080}]
+},
+{
+    name: remote-ejb-connection-ext,
+    binding: remote-ejb-ext,
+    profile: full-ha-ejb,
+    hosts: [{host: "${jboss.bind.address.private:127.0.0.1}", port: 11080}]
+},
+{
+    name: remote-ejb-connection-signature,
+    binding: remote-ejb-sign,
+    profile: full-ha-ejb,
+    protocol: remote,
+    hosts: [{host: tsign01, port: 4447}]
+},
+{
+    name: remote-ejb-connection,
+    binding: remote-ext-ejb,
+    profile: full-ha-ext,
+    hosts: [{host: "${jboss.bind.address.private:127.0.0.1}", port: 9080}]
+},
+{
+    name: remote-ejb-connection-signature,
+    binding: remote-ext-sign,
+    profile: full-ha-ext,
+    protocol: remote,
+    hosts: [{host: tsign01, port: 4447}]
+}
+]
+deployments: [
+    {src_artifact: logreader.war, dest_name: logreader.war, dest_server_group: cluster-group-rest}
+]
+
