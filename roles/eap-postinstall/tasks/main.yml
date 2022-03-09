@@ -1,9 +1,0 @@
----
-- name: Create config.cli on server
-  template: src=config.cli.j2 dest=/tmp/config.cli owner=jboss group=jboss
-
-- name: Create servers and server group
-  command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller={{jboss_bind}}:{{9999+(port_offset|default(0))}} -c --file=/tmp/config.cli"
-  ignore_errors: true
-  loop: "{{jboss_masters}}"
-  when: item == "{{node_name}}"
