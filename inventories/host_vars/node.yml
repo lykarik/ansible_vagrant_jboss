@@ -93,6 +93,6 @@ connections: [
 }
 ]
 deployments: [
-    {src_artifact: logreader.war, dest_name: logreader.war, dest_server_group: cluster-group-rest}
+    {src_artifact: activemq-rar-6.3.0.rar, dest_name: activemq-rar-6.3.0.rar, dest_server_group: cluster-group-ejb}
 ]
 
