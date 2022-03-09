@@ -28,3 +28,7 @@
 - name: Patching domain to 6.4.20
   ignore_errors: true
   shell: "{{jboss_dir}}/{{distr_name}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|int)}} -c --commands='patch apply /tmp/jboss-eap-{{jboss_patches[2]}}-patch.zip --host={{node_name}}, shutdown --restart=true --host={{node_name}}' && sleep 120"
+
+- name: Clear /tmp folder
+  shell: "rm -rf /tmp/*"
+

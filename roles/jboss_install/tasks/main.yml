@@ -11,12 +11,6 @@
 - name: Remove jboss dir
   file: path={{jboss_dir}} state=absent
 
-- name: Upload ActiveMQ distr
-  copy: src=roles/jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
-
-- name: Upload JBoss EAP distr
-  copy: src=roles/jboss_install/files/jboss_eap/6.4/{{ distr_name }}.0.zip dest=/tmp
-
 - name: Create JBoss group
   group: name=jboss state=present system=yes
 
@@ -63,22 +57,22 @@
 - name: Provide startup config
   template: src=jboss.conf.j2 dest=/etc/jboss-as/jboss-as-{{node_name}}.conf owner=root mode=0644
   notify:
-    - restart eap
+    - Restart jboss
 
 - name: Provide init.d script domain
   template: src=jboss_init.j2 dest=/etc/init.d/jboss-as owner=root mode=0755
   notify:
-    - restart eap
+    - Restart jboss
 
 - name: Provide init.d script domain for systemd
   template: src=jboss_init.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/init.d/systemd_jboss-as-domain.sh owner=root mode=0755
   notify:
-    - restart eap
+    - Restart jboss
 
 - name: Provide systemd script
   template: src=jboss.service.j2 dest=/etc/systemd/system/jboss-as.service
   notify:
-    - restart eap
+    - Restart jboss
 
 - name: Reload systemd daemon
   systemd: daemon-reload=yes

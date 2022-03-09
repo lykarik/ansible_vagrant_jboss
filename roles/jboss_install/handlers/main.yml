@@ -1,10 +1,10 @@
 ---
-- name: Restart JBoss
+- name: Restart jboss
   service: name=jboss-as state=restarted
   environment:
       LANG: "en_US.UTF-8"
 
-- name: Restart standalone JBoss
+- name: Restart standalone jboss
   service: name=jboss-as-{{node_name}} state=restarted
   environment:
       LANG: "en_US.UTF-8"

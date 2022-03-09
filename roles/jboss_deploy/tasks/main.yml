@@ -1,5 +1,5 @@
 ---
-- name: Copy object to server
+- name: Copy deploy objects to server
   copy: src=roles/jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
 
 - name: Deploy to domain
