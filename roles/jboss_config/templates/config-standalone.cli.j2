@@ -1,0 +1,23 @@
+/core-service=management/security-realm=ejb-security-realm:add()
+/core-service=management/security-realm=ejb-security-realm/server-identity=secret:add(value="ZWpiMTIzIUAj")
+/subsystem=deployment-scanner/scanner=default:write-attribute(name=auto-deploy-zipped, value=false)
+/subsystem=deployment-scanner/scanner=default:write-attribute(name=auto-deploy-xml, value=false)
+
+{% if connections is defined %}
+{% for conn in connections %}
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding={{conn.name}}:add(host={{conn.host}},port={{conn.port}},fixed-source-port=false)
+{% endfor %}
+{% endif %}
+
+if (outcome==success) of /core-service=vault:read-resource
+/core-service=vault:remove
+end-if
+if (outcome!=success) of /core-service=vault:read-resource
+/core-service=vault:add(vault-options=[("KEYSTORE_URL" => "/home/jboss/vault/vault.keystore"), ("KEYSTORE_PASSWORD" => "MASK-2nmZvu7uQidPfakGKQSLKD"), ("KEYSTORE_ALIAS" => "vault"), ("SALT" => "12345678"),("ITERATION_COUNT" => "50"), ("ENC_FILE_DIR" => "/home/jboss/vault/")])
+end-if
+
+/subsystem=messaging:remove()
+/subsystem=messaging:add()
+
+reload
+
