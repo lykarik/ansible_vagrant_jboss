@@ -1,5 +1,10 @@
 ---
-- hosts: node01
+- hosts: task_1
   become: yes
   roles:
-    - jboss_install
+  #- info_node
+  #- prep_node
+  - jboss_vault
+  - jboss_install
+  - eap-postinstall
+  - jboss_deploy
