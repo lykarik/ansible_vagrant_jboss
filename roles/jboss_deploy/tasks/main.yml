@@ -1,5 +1,8 @@
 ---
-- name: deploy artifact domain
+- name: Copy object to server
+  copy: src=roles/jboss_install/files/activemq/6.3/activemq-rar-6.3.0.rar dest=/tmp
+
+- name: Deploy to domain
   ignore_errors: true
   command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/jboss-cli.sh --controller=localhost:{{9999+(port_offset|default(0))}} -c --command='deploy /tmp/{{item.dest_name}} --server-groups={{item.dest_server_group}}'"
   with_items: "{{deployments}}"

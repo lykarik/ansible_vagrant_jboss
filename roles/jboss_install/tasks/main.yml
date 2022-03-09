@@ -1,16 +1,10 @@
 ---
-#*********************************************************************
-- name: upload jboss files
+- name: Upload jboss files
   copy: src={{item}} dest=/tmp
   loop:
     - "{{files}}/jboss_eap/6.4/jboss-eap-6.4.0.zip"
-#    - "{{files}}/activemq/6.3/activemq-rar-6.3.0.rar"
-#    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.9-patch.zip"
-#    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.19-patch.zip"
-#    - "{{files}}/jboss_eap/6.4/patches/jboss-eap-6.4.20-patch.zip"
-#*********************************************************************
 
-- name: stop jboss service
+- name: Stop jboss service
   service: name=jboss-as state=stopped
   ignore_errors: yes
 
@@ -60,7 +54,7 @@
   loop: "{{jboss_masters}}"
   when: item == "{{node_name}}"
 
-- name: provide host-slave.xml config
+- name: Provide host-slave.xml config
   template: src=host-slave.xml.j2 dest={{jboss_dir}}/jboss-eap-{{jboss_version}}/domain/configuration/host.xml owner=jboss mode=0644
   loop: "{{jboss_slaves}}"
   when: item == "{{node_name}}"

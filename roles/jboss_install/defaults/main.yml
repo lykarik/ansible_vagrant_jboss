@@ -20,5 +20,3 @@ domain_controller: True
 #standalone: True
 #====================================================
 jboss_bind: "{{ansible_all_ipv4_addresses[0]}}"
-#jboss_bind: "{{ansible_default_ipv4.address}}"
-
