@@ -7,7 +7,7 @@
             <security-realm name="ManagementRealm">
                 <server-identities>
                      <!-- Replace this with either a base64 password of your own, or use a vault with a vault expression -->
-                     <secret value="{{jboss_slave_pass|b64encode}}"/>
+                     <secret value="{{jboss_master_pass|b64encode}}"/>
                 </server-identities>
 
                 <authentication>
@@ -55,20 +55,20 @@
     </management>
 
     <domain-controller>
-       <remote host="10.32.101.82" port="${jboss.domain.master.port:9999}" security-realm="ManagementRealm" username="MyAdmin"/>
+       <remote host="10.32.101.87" port="${jboss.domain.master.port:9999}" security-realm="ManagementRealm" username="MyAdmin"/>
     </domain-controller>
 
     <interfaces>
         <interface name="management">
-            <inet-address value="${jboss.bind.address.management:0.0.0.0}"/>
+            <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-           <inet-address value="${jboss.bind.address:0.0.0.0}"/>
+           <inet-address value="${jboss.bind.address:127.0.0.1}"/>
         </interface>
         <interface name="unsecure">
             <!-- Used for IIOP sockets in the standard configuration.
                  To secure JacORB you need to setup SSL -->
-            <inet-address value="${jboss.bind.address.unsecure:0.0.0.0}"/>
+            <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>
         </interface>
     </interfaces>
 

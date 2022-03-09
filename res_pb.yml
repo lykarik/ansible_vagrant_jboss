@@ -4,7 +4,7 @@
   roles:
   #- info_node
   #- prep_node
-  - jboss_vault
   - jboss_install
+  - jboss_vault
   - jboss_config
   - jboss_deploy
