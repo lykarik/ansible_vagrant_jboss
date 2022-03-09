@@ -1,6 +1,0 @@
----
-- hosts: task_1
-  become: yes
-  roles:
-    - jboss_install
-
