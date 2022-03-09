@@ -6,5 +6,5 @@
   #- prep_node
   - jboss_vault
   - jboss_install
-  - eap-postinstall
+  - jboss_config
   - jboss_deploy

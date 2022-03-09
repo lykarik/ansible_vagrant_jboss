@@ -33,7 +33,7 @@
   file: state=directory dest=/etc/jboss-as owner=root mode=644
 
 - name: Add JBoss admin user
-  command: "{{ jboss_dir }}/jboss-eap-6.4/bin/add-user.sh -u MyAdmin -p password1@ -s"
+  command: "{{ jboss_dir }}/jboss-eap-6.4/bin/add-user.sh -u MyAdmin -p {{jboss_master_pass}} -s"
 
 - name: Add users for slaves
   command: "{{jboss_dir}}/jboss-eap-{{jboss_version}}/bin/add-user.sh -u {{item}} -p {{item}}123!@# -s"
