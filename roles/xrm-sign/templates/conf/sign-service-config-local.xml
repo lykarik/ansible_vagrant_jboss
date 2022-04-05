@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sign-service-config-local xsi:schemaLocation="http://dom.gosuslugi.ru/schema/signature/config/local sign-service-config-local.xsd" xmlns="http://dom.gosuslugi.ru/schema/signature/config/local" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <signer-config>
+        <keys>
+            <key id="ID_1">
+                <storeType>HDIMAGE</storeType>
+                <keyAlias>test2</keyAlias>
+                <storePassword>1234567890</storePassword>
+            </key>
+        </keys>
+    </signer-config>
+    <rest-config>
+        <maxRequestsPerCore>10</maxRequestsPerCore>
+        <requestTimeout>60000</requestTimeout>
+    </rest-config>
+</sign-service-config-local>
+

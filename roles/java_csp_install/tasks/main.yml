@@ -1,0 +1,53 @@
+---
+- name: set java_home based on oraclejdk
+  set_fact:
+    cryptopro_java_csp_jdk_home: "/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.322.b06-1.el7_9.x86_64"
+    cryptopro_java_csp_env_exporter: "/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.322.b06-1.el7_9.x86_64"
+
+- name: Create cryptopro_java_csp_path directory
+  file:
+    path: "{{cryptopro_java_csp_path}}/java-csp-{{cryptopro_java_csp_version}}"
+    state: "directory"
+
+- name: Download CSP distr
+  get_url:
+    url: "{{local_repo}}java-csp-5.0.42465.zip"
+    dest: /tmp
+
+- name: Extract cryptopro_java_csp archive
+  unarchive: copy=no src="/tmp/java-csp-{{cryptopro_java_csp_version}}.zip" dest="{{cryptopro_java_csp_path}}"
+
+- name: Force Install cryptopro java csp
+  shell: |
+    source {{cryptopro_java_csp_path}};
+    ./setup_console.sh {{cryptopro_java_csp_env_exporter}}/jre -force -install -jcsp -jcp -serial_jcsp {{cryptopro_license_keys_java_csp}}
+  args:
+    chdir: "{{cryptopro_java_csp_path}}/java-csp-{{cryptopro_java_csp_version}}"
+
+- name: Set up JSP license
+  shell: >
+    java ru.CryptoPro.JCSP.JCSPLicense -serial {{cryptopro_license_keys_java_csp}} -store
+  args:
+    chdir: "{{cryptopro_java_csp_env_exporter}}/jre/bin/"
+
+- name: Get license info
+  shell: |
+    source {{cryptopro_java_csp_jdk_home}}/jre;
+    java -classpath JCSP.jar ru.CryptoPro.JCSP.JCSPLicense
+  args:
+    chdir: "{{cryptopro_java_csp_jdk_home}}/jre/lib/ext"
+  register: __output_java_csp_license_info
+
+- name: Output license info
+  debug:
+    msg: "{{__output_java_csp_license_info.stdout}}"
+
+- name: Fix permissions on directory
+  file:
+    path: /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.322.b06-1.el7_9.x86_64/jre/.systemPrefs/ru
+    state: directory
+    recurse: yes
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+    mode: "u=rwX,g=rX,o=rX"
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sign-service-config-global xsi:schemaLocation="http://dom.gosuslugi.ru/schema/signature/config/global sign-service-config-global.xsd" xmlns="http://dom.gosuslugi.ru/schema/signature/config/global" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rootCertificates>
+        <rootCertificate id="RTK_test_CA.cer">
+            <base64Encoded>MIIFdzCCBSSgAwIBAgIQcgsBVlAAELPoEaRoS+uv+zAKBggqhQMHAQEDAjCCAT8xGDAWBgUqhQNkARINMTAyNzcwMDE5ODc2NzEaMBgGCCqFAwOBAwEBEgwwMDc3MDcwNDkzODgxCzAJBgNVBAYTAlJVMSkwJwYDVQQIDCA3OCDQodCw0L3QutGCLdCf0LXRgtC10YDQsdGD0YDQszEmMCQGA1UEBwwd0KHQsNC90LrRgi3Qn9C10YLQtdGA0LHRg9GA0LMxWDBWBgNVBAkMTzE5MTAwMiwg0LMuINCh0LDQvdC60YIt0J/QtdGC0LXRgNCx0YPRgNCzLCDRg9C7LiDQlNC+0YHRgtC+0LXQstGB0LrQvtCz0L4g0LQuMTUxJjAkBgNVBAoMHdCf0JDQniAi0KDQvtGB0YLQtdC70LXQutC+0LwiMSUwIwYDVQQDDBzQotC10YHRgtC+0LLRi9C5INCj0KYg0KDQotCaMB4XDTE4MDYwNTA5MzQwNloXDTMzMDYwNTA5MzQwNlowggE/MRgwFgYFKoUDZAESDTEwMjc3MDAxOTg3NjcxGjAYBggqhQMDgQMBARIMMDA3NzA3MDQ5Mzg4MQswCQYDVQQGEwJSVTEpMCcGA1UECAwgNzgg0KHQsNC90LrRgi3Qn9C10YLQtdGA0LHRg9GA0LMxJjAkBgNVBAcMHdCh0LDQvdC60YIt0J/QtdGC0LXRgNCx0YPRgNCzMVgwVgYDVQQJDE8xOTEwMDIsINCzLiDQodCw0L3QutGCLdCf0LXRgtC10YDQsdGD0YDQsywg0YPQuy4g0JTQvtGB0YLQvtC10LLRgdC60L7Qs9C+INC0LjE1MSYwJAYDVQQKDB3Qn9CQ0J4gItCg0L7RgdGC0LXQu9C10LrQvtC8IjElMCMGA1UEAwwc0KLQtdGB0YLQvtCy0YvQuSDQo9CmINCg0KLQmjBmMB8GCCqFAwcBAQEBMBMGByqFAwICIwEGCCqFAwcBAQICA0MABEDkmNXXv/fTXGwqh9YBqXd5VDLa2+2P67SzEhXyhsOFUPUuDbk1FwNXx/s3efgc0jexpggrVDfuFvolwT5ro4Jwo4IB7zCCAeswDgYDVR0PAQH/BAQDAgGGMB0GA1UdDgQWBBRIEK8PXdyZJHb3vw3aS30N2Uzh9zARBgkrBgEEAYI3FAIEBAwCQ0EwEgYDVR0TAQH/BAgwBgEB/wIBADAlBgNVHSAEHjAcMAYGBFUdIAAwCAYGKoUDZHEBMAgGBiqFA2RxAjCCARAGBSqFA2RwBIIBBTCCAQEMGtCa0YDQuNC/0YLQvtCf0YDQviBDU1AgNC4wDB3QmtGA0LjQv9GC0L7Qn9GA0L4g0KPQpiB2LjIuMAxh0KHQtdGA0YLQuNGE0LjQutCw0YLRiyDRgdC+0L7RgtCy0LXRgtGB0YLQstC40Y8g0KTQodCRINCg0L7RgdGB0LjQuCDQodCkLzEyNC0zMzgwINC+0YIgMTEuMDUuMjAxOAxh0KHQtdGA0YLQuNGE0LjQutCw0YLRiyDRgdC+0L7RgtCy0LXRgtGB0YLQstC40Y8g0KTQodCRINCg0L7RgdGB0LjQuCDQodCkLzEyOC0yOTgzINC+0YIgMTguMTEuMjAxNjAlBgUqhQNkbwQcDBrQmtGA0LjQv9GC0L7Qn9GA0L4gQ1NQIDQuMDAQBgkrBgEEAYI3FQEEAwIBADAfBgkrBgEEAYI3FQcEEjAQBggqhQMCAi4AAAIBAQIBADAKBggqhQMHAQEDAgNBADA0sh87iQPdgVErTpIdmJDLzYyU5Oa99p1YqakOD5H6ajsLSzve57hht61JwhOJscvwcrtzjUqutRZEB5lgY9s=</base64Encoded>
+        </rootCertificate>
+    </rootCertificates>
+    <downloaderSettings>
+        <downloadThreadCount>10</downloadThreadCount>
+        <defaultMaxPerRoute>2</defaultMaxPerRoute>
+        <socketTimeout>0</socketTimeout>
+        <connectionTimeout>0</connectionTimeout>
+    </downloaderSettings>
+    <crlSettings>
+        <downloadTimeout>60000</downloadTimeout>
+        <updatePeriod>60</updatePeriod>
+        <cleanupPeriod>60</cleanupPeriod>
+        <fastRemoval>false</fastRemoval>
+    </crlSettings>
+    <tslSettings>
+        <tslUrl>http://e-trust.gosuslugi.ru/CA/DownloadTSL?schemaVersion=0</tslUrl>
+        <downloadTimeout>450000</downloadTimeout>
+        <updatePeriod>720</updatePeriod>
+    </tslSettings>
+    <authSettings>
+        <caller enabled="true">
+            <name>Демо-приложение</name>
+            <apiKey>demo_secret</apiKey>
+            <sign enabled="true">
+                <keyId>ID_1</keyId>
+            </sign>
+            <verify enabled="true"/>
+            <digest enabled="true"/>
+            <management enabled="true"/>
+            <monitoring enabled="true"/>
+        </caller>
+        <anonymous>
+            <verify enabled="false"/>
+            <digest enabled="false"/>
+            <management enabled="false"/>
+            <monitoring enabled="true"/>
+        </anonymous>
+    </authSettings>
+    <skipCAConformityCheck>true</skipCAConformityCheck>
+    <includeStacktrace>false</includeStacktrace>
+</sign-service-config-global>
+

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+    <Loader loaderClass="org.apache.catalina.loader.WebappClassLoader"/>
+    <Environment name="sign-service.config.local.file" value="file:${catalina.base}/conf/sign-service-config-local.xml" type="java.lang.String"/>
+    <Environment name="sign-service.config.global.file" value="file:${catalina.base}/conf/sign-service-config-global.xml" type="java.lang.String"/>
+</Context>

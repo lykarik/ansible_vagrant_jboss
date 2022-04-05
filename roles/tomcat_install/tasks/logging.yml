@@ -1,0 +1,31 @@
+---
+- name: Create log4j folder
+  file:
+    path: "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/lib/log4j2"
+    owner: "{{tomcat_user}}"
+    group: "{{tomcat_group}}"
+    state: "directory"
+
+- name: Download log4j modules
+  get_url:
+     url: "{{local_repo}}log4j-{{item}}-2.17.2.jar"
+     dest: "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/lib/log4j2/"
+  loop:
+    - api
+    - core
+    - jul
+
+- name: Deliver log4j template into {{tomcat_folder}}
+  template:
+    src: "log4j2.xml.j2"
+    dest: "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/conf/log4j2.xml"
+    owner: "{{tomcat_user}}"
+    group: "{{tomcat_group}}"
+    mode: "0644"
+
+- name: Rename .properties file, to disable default tomcat's logging
+  command: mv {{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/conf/logging.properties {{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/conf/logging.properties.bckp
+  ignore_errors: yes
+
+- name: Restart tomcat service
+  systemd: name=tomcat state=restarted

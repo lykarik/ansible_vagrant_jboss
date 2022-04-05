@@ -1,0 +1,10 @@
+- name: Отключение предупреждающих окон о необходимости скорого перехода на ГОСТ Р 34.10-2012
+  ini_file:
+    path: "/etc/opt/cprocsp/config64.ini"
+    section: Parameters
+    option: "{{item.option}}"
+    value: "{{item.value}}"
+    backup: yes
+  with_items:
+    - { option: "warning_time_gen_2001", value: "ll:9223372036854775807" }
+    - { option: "warning_time_sign_2001", value: "ll:9223372036854775807" }

@@ -1,0 +1,49 @@
+#!/bin/sh
+# chkconfig: - 98 02
+# description: tomcat
+# processname: tomcat
+
+# Source function library.
+if [ -f /etc/init.d/functions ] ; then
+  . /etc/init.d/functions
+elif [ -f /etc/rc.d/init.d/functions ] ; then
+  . /etc/rc.d/init.d/functions
+else
+  exit 0
+fi
+KIND="tomcat"
+
+start() {
+        echo -n $"Starting $KIND services: "
+        su -c "{{tomcat_install_folder}}/apache-tomcat/bin/startup.sh" {{tomcat_user}}
+        echo
+}
+
+stop() {
+        echo -n $"Shutting down $KIND services: "
+        su -c "{{tomcat_install_folder}}/apache-tomcat/bin/shutdown.sh" {{tomcat_user}}
+        echo
+}
+
+restart() {
+           echo -n $"Restarting $KIND services: "
+           su -c "{{tomcat_install_folder}}/apache-tomcat/bin/startup.sh" {{tomcat_user}}
+           su -c "{{tomcat_install_folder}}/apache-tomcat/bin/shutdown.sh" {{tomcat_user}}
+           echo
+}
+
+case "$1" in
+  start)
+          start
+        ;;
+  stop)
+          stop
+        ;;
+  restart)
+          restart
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+exit $?

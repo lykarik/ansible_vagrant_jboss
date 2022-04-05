@@ -1,0 +1,78 @@
+---
+tomcat_download_url_apache_org: "http://apache-mirror.rbc.ru/pub/apache/tomcat/tomcat-9/v{{tomcat_version}}/bin/apache-tomcat-{{tomcat_version}}.tar.gz"
+
+tomcat_version_checksum:
+  v_9.0.27: "sha512:408d30bf56d59941149b397e5e725a5f9baf225807397a4b7a3be79f7d211e6d878d34bf00776746a54cc7d067f168db24c367e5c7390bb7329b3bca428726cc"
+  v_9.0.36: "sha512:75e16a00e02782961a7753dc9afaf6d209afa5f22d320319778fd0ee5e3b47009da522ac735599f1739bff6e809c2da9081dbbd4b8de54a82cf5b8cfbd8030ff"
+  v_9.0.43: "sha512:3dbc5a1b621598beb3219bac8c78fcaeac9b2169b5aa83fc8c0937275dd9f7701147573336804b28389f8e761a92a2da3327e66f46b97fed37fa374d52126e9d"
+  v_9.0.50: "sha512:06cd51abbeebba9385f594ed092bd30e510b6314c90c421f4be5d8bec596c6a177785efc2ce27363813f6822af89fc88a2072d7b051960e5387130faf69c447b"
+  v_9.0.58: "sha512:33c030a312a0a087deeb06fff921d13a23789e152d30620f33a368e7a2244c762fcf9acd55f3b90f08560704ba45bc2be820bccf2058b0cf5801a7b124f9056d"
+
+tomcat_pam_limits_default:
+  nofile:
+    domain: "{{tomcat_user}}"
+    comment: "Maximum nofile"
+    limit_type: "-"
+    value: "65535"
+  nproc:
+    domain: "{{tomcat_user}}"
+    comment: "Maximum nproc"
+    limit_type: "-"
+    value: "32768"
+
+tomcat_log4j_conf_default: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration status="info" monitorInterval="10">
+        <Properties>
+            <Property name="logdir">${sys:catalina.base}/logs</Property>
+            <Property name="layout">%d [%t] %-5p %c:%L %m%n</Property>
+        </Properties>
+        <Appenders>
+            <!-- ротацию catalina.out делаем за счет logrotate.d -->
+            <Console name="CONSOLE" target="SYSTEM_OUT">
+                <PatternLayout pattern="${layout}"/>
+            </Console>
+            <RollingFile name="CATALINA" fileName="${logdir}/catalina.log" filePattern="${logdir}/catalina.%d{yyyy-MM-dd}.log.gz">
+                <PatternLayout pattern="${layout}"/>
+                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+                <DefaultRolloverStrategy>
+                    <Delete basePath="${logdir}" maxDepth="1">
+                        <IfFileName glob="catalina.*.log.gz"/>
+                        <IfAccumulatedFileCount exceeds="10"/>
+                    </Delete>
+                </DefaultRolloverStrategy>
+            </RollingFile>
+            <RollingFile name="MANAGER" fileName="${logdir}/manager.log" filePattern="${logdir}/manager.%d{yyyy-MM-dd}.log.gz">
+                <PatternLayout pattern="${layout}"/>
+                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+                <DefaultRolloverStrategy>
+                    <Delete basePath="${logdir}" maxDepth="1">
+                        <IfFileName glob="manager.*.log.gz"/>
+                        <IfAccumulatedFileCount exceeds="10"/>
+                    </Delete>
+                </DefaultRolloverStrategy>
+            </RollingFile>
+            <RollingFile name="HOST-MANAGER" fileName="${logdir}/host-manager.log" filePattern="${logdir}/host-manager.%d{yyyy-MM-dd}.log.gz">
+                <PatternLayout pattern="${layout}"/>
+                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+                <DefaultRolloverStrategy>
+                    <Delete basePath="${logdir}" maxDepth="1">
+                        <IfFileName glob="host-manager.*.log.gz"/>
+                        <IfAccumulatedFileCount exceeds="10"/>
+                    </Delete>
+                </DefaultRolloverStrategy>
+            </RollingFile>
+        </Appenders>
+        <Loggers>
+            <Root level="info">
+                <AppenderRef ref="CONSOLE"/>
+                <AppenderRef ref="CATALINA"/>
+            </Root>
+            <Logger name="org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager]" level="info" additivity="false">
+                <AppenderRef ref="MANAGER"/>
+            </Logger>
+            <Logger name="org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager]" level="info" additivity="false">
+                <AppenderRef ref="HOST-MANAGER"/>
+            </Logger>
+        </Loggers>
+    </Configuration>

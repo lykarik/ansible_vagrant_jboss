@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sign-service-config-global xsi:schemaLocation="http://dom.gosuslugi.ru/schema/signature/config/global sign-service-config-global.xsd"
+                            xmlns="http://dom.gosuslugi.ru/schema/signature/config/global" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rootCertificates>
+        <rootCertificate id="guc2012">
+            <base64Encoded>MIIFFDCCBMGgAwIBAgIQTm1HiybyfWV/do4CXOPTkzAKBggqhQMHAQEDAjCCASQxHjAcBgkqhkiG9w0BCQEWD2RpdEBtaW5zdnlhei5ydTELMAkGA1UEBhMCUlUxGDAWBgNVBAgMDzc3INCc0L7RgdC60LLQsDEZMBcGA1UEBwwQ0LMuINCc0L7RgdC60LLQsDEuMCwGA1UECQwl0YPQu9C40YbQsCDQotCy0LXRgNGB0LrQsNGPLCDQtNC+0LwgNzEsMCoGA1UECgwj0JzQuNC90LrQvtC80YHQstGP0LfRjCDQoNC+0YHRgdC40LgxGDAWBgUqhQNkARINMTA0NzcwMjAyNjcwMTEaMBgGCCqFAwOBAwEBEgwwMDc3MTA0NzQzNzUxLDAqBgNVBAMMI9Cc0LjQvdC60L7QvNGB0LLRj9C30Ywg0KDQvtGB0YHQuNC4MB4XDTE4MDcwNjEyMTgwNloXDTM2MDcwMTEyMTgwNlowggEkMR4wHAYJKoZIhvcNAQkBFg9kaXRAbWluc3Z5YXoucnUxCzAJBgNVBAYTAlJVMRgwFgYDVQQIDA83NyDQnNC+0YHQutCy0LAxGTAXBgNVBAcMENCzLiDQnNC+0YHQutCy0LAxLjAsBgNVBAkMJdGD0LvQuNGG0LAg0KLQstC10YDRgdC60LDRjywg0LTQvtC8IDcxLDAqBgNVBAoMI9Cc0LjQvdC60L7QvNGB0LLRj9C30Ywg0KDQvtGB0YHQuNC4MRgwFgYFKoUDZAESDTEwNDc3MDIwMjY3MDExGjAYBggqhQMDgQMBARIMMDA3NzEwNDc0Mzc1MSwwKgYDVQQDDCPQnNC40L3QutC+0LzRgdCy0Y/Qt9GMINCg0L7RgdGB0LjQuDBmMB8GCCqFAwcBAQEBMBMGByqFAwICIwEGCCqFAwcBAQICA0MABEB1OSpFp7milX33EP0ikge6HbZacYp9fVj8sUa5RWFXrB27SKX5SvtIGepqKev69RSYeHHKR+jT9YX2NuSK9wONo4IBwjCCAb4wgfUGBSqFA2RwBIHrMIHoDDTQn9CQ0JrQnCDCq9Ca0YDQuNC/0YLQvtCf0YDQviBIU03CuyDQstC10YDRgdC40LggMi4wDEPQn9CQ0JogwqvQk9C+0LvQvtCy0L3QvtC5INGD0LTQvtGB0YLQvtCy0LXRgNGP0Y7RidC40Lkg0YbQtdC90YLRgMK7DDXQl9Cw0LrQu9GO0YfQtdC90LjQtSDihJYgMTQ5LzMvMi8yLzIzINC+0YIgMDIuMDMuMjAxOAw00JfQsNC60LvRjtGH0LXQvdC40LUg4oSWIDE0OS83LzYvMTA1INC+0YIgMjcuMDYuMjAxODA/BgUqhQNkbwQ2DDTQn9CQ0JrQnCDCq9Ca0YDQuNC/0YLQvtCf0YDQviBIU03CuyDQstC10YDRgdC40LggMi4wMEMGA1UdIAQ8MDowCAYGKoUDZHEBMAgGBiqFA2RxAjAIBgYqhQNkcQMwCAYGKoUDZHEEMAgGBiqFA2RxBTAGBgRVHSAAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTCVPG0a9RMt+BtNrQjkPH+wzybBjAKBggqhQMHAQEDAgNBAJr6/eI7rHL7+FsQnoH2i6DVxqalbIxLKj05edpZGPLLb6B2PTAMya7pSt9hb8QnFABgsR4IE5gT4VVkDWbX/n4=</base64Encoded>
+        </rootCertificate>
+        <rootCertificate id="guc2001">
+            <base64Encoded>MIIFGTCCBMigAwIBAgIQNGgeQMtB7zOpoLfIdpKaKTAIBgYqhQMCAgMwggFKMR4wHAYJKoZIhvcNAQkBFg9kaXRAbWluc3Z5YXoucnUxCzAJBgNVBAYTAlJVMRwwGgYDVQQIDBM3NyDQsy4g0JzQvtGB0LrQstCwMRUwEwYDVQQHDAzQnNC+0YHQutCy0LAxPzA9BgNVBAkMNjEyNTM3NSDQsy4g0JzQvtGB0LrQstCwLCDRg9C7LiDQotCy0LXRgNGB0LrQsNGPLCDQtC4gNzEsMCoGA1UECgwj0JzQuNC90LrQvtC80YHQstGP0LfRjCDQoNC+0YHRgdC40LgxGDAWBgUqhQNkARINMTA0NzcwMjAyNjcwMTEaMBgGCCqFAwOBAwEBEgwwMDc3MTA0NzQzNzUxQTA/BgNVBAMMONCT0L7Qu9C+0LLQvdC+0Lkg0YPQtNC+0YHRgtC+0LLQtdGA0Y/RjtGJ0LjQuSDRhtC10L3RgtGAMB4XDTEyMDcyMDEyMzExNFoXDTI3MDcxNzEyMzExNFowggFKMR4wHAYJKoZIhvcNAQkBFg9kaXRAbWluc3Z5YXoucnUxCzAJBgNVBAYTAlJVMRwwGgYDVQQIDBM3NyDQsy4g0JzQvtGB0LrQstCwMRUwEwYDVQQHDAzQnNC+0YHQutCy0LAxPzA9BgNVBAkMNjEyNTM3NSDQsy4g0JzQvtGB0LrQstCwLCDRg9C7LiDQotCy0LXRgNGB0LrQsNGPLCDQtC4gNzEsMCoGA1UECgwj0JzQuNC90LrQvtC80YHQstGP0LfRjCDQoNC+0YHRgdC40LgxGDAWBgUqhQNkARINMTA0NzcwMjAyNjcwMTEaMBgGCCqFAwOBAwEBEgwwMDc3MTA0NzQzNzUxQTA/BgNVBAMMONCT0L7Qu9C+0LLQvdC+0Lkg0YPQtNC+0YHRgtC+0LLQtdGA0Y/RjtGJ0LjQuSDRhtC10L3RgtGAMGMwHAYGKoUDAgITMBIGByqFAwICIwEGByqFAwICHgEDQwAEQI+lv3kQI8jWka1kMVdbvpvFioP0Pyn3Knmp+2XD6KgPWnXEIlSRX8g/IYracDr51YsNc2KE3C7mkH6hA3M3ofujggGCMIIBfjCBxgYFKoUDZHAEgbwwgbkMI9Cf0JDQmtCcIMKr0JrRgNC40L/RgtC+0J/RgNC+IEhTTcK7DCDQn9CQ0JogwqvQk9C+0LvQvtCy0L3QvtC5INCj0KbCuww20JfQsNC60LvRjtGH0LXQvdC40LUg4oSWIDE0OS8zLzIvMi05OTkg0L7RgiAwNS4wNy4yMDEyDDjQl9Cw0LrQu9GO0YfQtdC90LjQtSDihJYgMTQ5LzcvMS80LzItNjAzINC+0YIgMDYuMDcuMjAxMjAuBgUqhQNkbwQlDCPQn9CQ0JrQnCDCq9Ca0YDQuNC/0YLQvtCf0YDQviBIU03CuzBDBgNVHSAEPDA6MAgGBiqFA2RxATAIBgYqhQNkcQIwCAYGKoUDZHEDMAgGBiqFA2RxBDAIBgYqhQNkcQUwBgYEVR0gADAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUi5g7iRhR6O+cAni46sjUILJVyV0wCAYGKoUDAgIDA0EA23Reec/Y27rpMi+iFbgWCazGY3skBTq5ZGsQKOUxCe4mO7UBDACiWqdA0nvqiQMXeHgqo//fO9pxuIHtymwyMg==</base64Encoded>
+        </rootCertificate>
+    </rootCertificates>
+    <downloaderSettings>
+        <downloadThreadCount>10</downloadThreadCount>
+        <defaultMaxPerRoute>2</defaultMaxPerRoute>
+        <socketTimeout>0</socketTimeout>
+        <connectionTimeout>0</connectionTimeout>
+    </downloaderSettings>
+    <crlSettings>
+        <downloadTimeout>60000</downloadTimeout>
+        <updatePeriod>60</updatePeriod>
+        <cleanupPeriod>60</cleanupPeriod>
+        <fastRemoval>false</fastRemoval>
+    </crlSettings>
+    <tslSettings>
+        <tslUrl>http://e-trust.gosuslugi.ru/CA/DownloadTSL?schemaVersion=0</tslUrl>
+        <downloadTimeout>450000</downloadTimeout>
+        <updatePeriod>720</updatePeriod>
+    </tslSettings>
+    <authSettings>
+        <caller enabled="true">
+            <name>Демо-приложение</name>
+            <apiKey>demo_secret</apiKey>
+            <sign enabled="true">
+                <keyId>ID_1</keyId>
+            </sign>
+            <verify enabled="true"/>
+            <digest enabled="true"/>
+            <management enabled="true"/>
+            <monitoring enabled="true"/>
+        </caller>
+        <anonymous>
+            <verify enabled="false"/>
+            <digest enabled="false"/>
+            <management enabled="false"/>
+            <monitoring enabled="true"/>
+        </anonymous>
+    </authSettings>
+    <skipCAConformityCheck>true</skipCAConformityCheck>
+    <includeStacktrace>false</includeStacktrace>
+</sign-service-config-global>

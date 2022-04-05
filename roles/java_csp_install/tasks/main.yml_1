@@ -1,0 +1,102 @@
+---
+# check license
+# java -classpath JCSP.jar ru.CryptoPro.JCSP.JCSPLicense
+- name: set java_home based on oraclejdk
+  set_fact:
+    cryptopro_java_csp_jdk_home: "{{java_jdk_env}}"
+    cryptopro_java_csp_env_exporter: "{{java_jdk_env_bin_path}}/{{cryptopro_java_csp_jdk}}"
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+
+- name: Create cryptopro_java_csp_path directory
+  file:
+    path: "{{cryptopro_java_csp_path}}"
+    state: "directory"
+#  when:
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+
+#- name: Install unzip
+#  package: name=unzip
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+
+#- name: Import get_url_cache
+#  import_role:
+#    name: get_url_cache
+#  vars:
+#    get_url_cache: "{{cryptopro_java_csp_download_url}}"
+#    get_url_cache_checksum: "{{ cryptopro_java_csp_version_checksum['v_' + cryptopro_java_csp_version] }}"
+#    get_url_cache_file: "cryptopro_java_csp-{{cryptopro_java_csp_version}}.zip"
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+
+#- name: Extract cryptopro_java_csp archive
+#  unarchive:
+#    src: "{{get_url_cache_path}}/cryptopro_java_csp-{{cryptopro_java_csp_version}}.zip"
+#    dest: "{{cryptopro_java_csp_path}}"
+#    creates: "{{cryptopro_java_csp_path}}/java-csp-{{cryptopro_java_csp_version}}"
+#    remote_src: yes
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+
+#- name: Install cryptopro java csp if JCSP.jar doesn't exists
+#  shell: |
+#    source {{cryptopro_java_csp_env_exporter}};
+#    ./setup_console.sh {{cryptopro_java_csp_jdk_home}}/jre -force -install -jcsp -jcp -java -serial_jcsp {{cryptopro_license_keys_java_csp[inventory_hostname]}}
+#  args:
+#    chdir: "{{cryptopro_java_csp_path}}/java-csp-{{cryptopro_java_csp_version}}"
+#    creates: "{{cryptopro_java_csp_jdk_home}}/jre/lib/ext/JCSP.jar"
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+#    - not (cryptopro_java_csp_force_install_license is defined and cryptopro_java_csp_force_install_license)
+
+- name: Force Install cryptopro java csp
+  shell: |
+    source {{cryptopro_java_csp_env_exporter}};
+    ./setup_console.sh {{cryptopro_java_csp_jdk_home}}/jre -force -install -jcsp -jcp -java -serial_jcsp {{cryptopro_license_keys_java_csp}}
+  args:
+    chdir: "{{cryptopro_java_csp_path}}/java-csp-{{cryptopro_java_csp_version}}"
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_java_csp_force_install_license is defined and cryptopro_java_csp_force_install_license
+
+- name: Get license info
+  shell: |
+    source {{cryptopro_java_csp_jdk_home}}/jre;
+    java -classpath JCSP.jar ru.CryptoPro.JCSP.JCSPLicense
+  args:
+    chdir: "{{cryptopro_java_csp_jdk_home}}/jre/lib/ext"
+  register: __output_java_csp_license_info
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined
+
+- name: Output license info
+  debug:
+    msg: "{{__output_java_csp_license_info.stdout}}"
+#  when:
+#    - cryptopro_java_csp_jdk is defined
+#    - cryptopro_java_csp_version is defined
+#    - cryptopro_license_keys_java_csp is defined
+#    - cryptopro_license_keys_java_csp[inventory_hostname] is defined

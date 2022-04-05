@@ -1,0 +1,5 @@
+- name: Change allow settings
+  replace: path={{item}} regexp='allow=".*"' replace='allow="{{tomcat_allow_mask}}"' backup=yes
+  with_items:
+    - "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/webapps/manager/META-INF/context.xml"
+    - "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/webapps/host-manager/META-INF/context.xml"

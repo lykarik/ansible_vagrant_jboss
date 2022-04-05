@@ -1,0 +1,11 @@
+---
+- name: install xrm-sign
+  hosts: selsng01
+  become: yes
+  roles:
+   - prep_node
+   - tomcat_install
+   - cprocsp_install
+   - java_csp_install
+   - keys_cprocsp
+   - xrm-sign

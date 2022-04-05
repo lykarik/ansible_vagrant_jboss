@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+   <Environment name="sign-demo.properties.file" value="file:${catalina.base}/conf/sign-demo.properties" type="java.lang.String"/>
+</Context>

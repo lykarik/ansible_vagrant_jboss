@@ -1,0 +1,6 @@
+---
+- name: restart tomcat
+  systemd: name=tomcat state=restarted
+
+- name: reload tomcat
+  systemd: name=tomcat state=reloaded

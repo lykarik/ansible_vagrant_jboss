@@ -1,0 +1,92 @@
+---
+#-------------------------------------------------------------------------------------------------
+- name: Create tomcat group
+  group: name={{tomcat_group}} state=present system=yes
+
+- name: Create tomcat user
+  user: name={{tomcat_user}} group={{tomcat_group}} system=yes
+
+- name: Create tomcat folder
+  file: name={{tomcat_folder}} state=directory owner={{tomcat_user}} group={{tomcat_group}}
+
+- name: Create tomcat app cache folder
+  file: path={{tomcat_cache_folder}} state=directory owner={{tomcat_user}} group={{tomcat_group}}
+
+#-------------------------------------------------------------------------------------------------
+- name: Download tomcat distr
+  get_url:
+    url: "{{local_repo}}apache-tomcat-9.0.60.zip"
+    dest: /tmp
+
+- name: Unzip tomcat distr to {{tomcat_folder}}
+  unarchive: copy=no src="/tmp/apache-tomcat-{{tomcat_version}}.zip" dest="{{tomcat_folder}}"
+
+#-------------------------------------------------------------------------------------------------
+- name: Fix scripts attributes
+  file:
+    path: "{{item}}"
+    mode: '755'
+  loop:
+    - "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/bin/startup.sh"
+    - "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/bin/catalina.sh"
+
+#-------------------------------------------------------------------------------------------------
+- name: Deliver tomcat templates
+  template: src={{item}} dest={{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/{{item}}
+  with_items:
+    - bin/setenv.sh
+    - conf/server.xml
+    - conf/tomcat-users.xml
+
+- name: Deliver tomcat startup systemd script
+  template: src=tomcat.service.j2 dest=/etc/systemd/system/tomcat.service owner={{tomcat_user}} mode=0644
+
+#-------------------------------------------------------------------------------------------------
+- name: Fix permissions on directory
+  file:
+    path: "{{tomcat_folder}}"
+    state: directory
+    recurse: yes
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+    mode: "u=rwX,g=rX,o=rX"
+
+#-------------------------------------------------------------------------------------------------
+- name: Include -logging.yml- configuration
+  include: logging.yml
+
+- name: Include -allow.yml- configuration
+  include: allow.yml
+
+#-------------------------------------------------------------------------------------------------
+- name: Fix permissions on directory
+  file:
+    path: "{{tomcat_folder}}"
+    state: directory
+    recurse: yes
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+    mode: "u=rwX,g=rX,o=rX"
+
+#-------------------------------------------------------------------------------------------------
+- name: Taking *.war files
+  get_url:
+    url: "{{local_repo}}sign-{{item}}.war"
+    dest: "{{tomcat_folder}}/apache-tomcat-9.0.60/webapps"
+  loop:
+    - service
+    - demo
+
+#-------------------------------------------------------------------------------------------------
+- name: Fix permissions on directory
+  file:
+    path: "{{tomcat_folder}}"
+    state: directory
+    recurse: yes
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+    mode: "u=rwX,g=rX,o=rX"
+
+#-------------------------------------------------------------------------------------------------
+- name: Enabling and starting tomcat service
+  systemd: name=tomcat state=restarted enabled=yes daemon_reload=yes

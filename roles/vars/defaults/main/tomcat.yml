@@ -1,0 +1,36 @@
+---
+
+tomcat_java_opts: "-Xms4G -Xmx4G"
+tomcat_version: "9.0.60"
+tomcat_download_url:   "http://10.32.101.215/repos/centos/releases/7/x86_64/apache-tomcat-{{tomcat_version}}.zip"  #custom repo
+tomcat_download_url_default: "http://10.32.101.215/repos/centos/releases/7/x86_64/apache-tomcat-{{tomcat_version}}.zip"  #custom repo
+
+
+tomcat_folder: "/opt/tomcat"
+tomcat_cache_folder: "/opt/cache/tomcat/apps"
+tomcat_user:  "tomcat"
+tomcat_group: "tomcat"
+
+tomcat_java_opts_default: "-Xms4G -Xmx4G -Dlog4j2.formatMsgNoLookups=true"
+
+tomcat_http_port: 8080
+tomcat_https_port: 8443
+
+tomcat_jmx_enable: true
+tomcat_jmx_port: 4447
+tomcat_jmx_rmi_port: 1100
+
+# Migration or not logging subsystem to log4j2
+tomcat_log4j2: true
+
+# Users
+tomcat_users: [
+  {name: "tomcat",
+  password: "password1@",
+  roles: ["manager-gui","manager-script","admin-gui"]
+  }
+]
+
+# Allow setting
+tomcat_allow_enable: True
+tomcat_allow_mask: ".*"

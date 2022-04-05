@@ -1,0 +1,30 @@
+---
+- name: Deliver Catalina .conf files
+  template:
+    src: "{{item}}"
+    dest: "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/{{item}}"
+    backup: yes
+  with_items:
+    - conf/Catalina/localhost/sign-service.xml
+    - conf/Catalina/localhost/sign-demo.xml
+    - conf/sign-demo.properties
+  notify: [ "tomcat started" ]
+
+- name: Deliver tomcat .conf files
+  template:
+    src: "{{item}}"
+    dest: "{{tomcat_folder}}/apache-tomcat-{{tomcat_version}}/{{item}}"
+    backup: yes
+  with_items:
+    - conf/sign-service-config-local.xml
+    - conf/sign-service-config-global.xml
+
+- name: Fix permissions on directory
+  file:
+    path: "{{tomcat_folder}}"
+    state: directory
+    recurse: yes
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+    mode: "u=rwX,g=rX,o=rX"
+  notify: [ "tomcat restarted" ]

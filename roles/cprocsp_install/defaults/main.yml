@@ -1,0 +1,15 @@
+---
+
+cryptopro_install_rpms_36R4_suffix: "-3.6.1-4"
+cryptopro_install_rpms_40R3_suffix: "-4.0.9944-5"
+cryptopro_install_rpms_50_suffix: "-5.0.12000-6"
+
+cryptopro_install_rpms:
+  - "lsb-cprocsp-base.noarch"
+  - "lsb-cprocsp-capilite-64.x86_64"
+  - "lsb-cprocsp-kc1-64.x86_64"
+  - "lsb-cprocsp-rdr-64.x86_64"
+#  - "lsb-cprocsp-base{{cryptopro_install_rpms_version_suffix}}"
+#  - "lsb-cprocsp-kc1-64{{cryptopro_install_rpms_version_suffix}}"
+#  - "lsb-cprocsp-rdr-64{{cryptopro_install_rpms_version_suffix}}"
+#  - "lsb-cprocsp-capilite-64{{cryptopro_install_rpms_version_suffix}}"

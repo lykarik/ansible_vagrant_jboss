@@ -1,0 +1,23 @@
+---
+# local repo path
+local_repo: "http://192.168.88.169/centos/7/x86_64/"
+# CRYPTO_KEYS
+crypto_keys_location: "/var/opt/cprocsp/keys/tomcat"
+cryptopro_license_keys: "50502-X0000-02ZBK-CQ69Y-1E17T"
+crypto_keys_user: "tomcat"
+cryptopro_license_keys_java_csp: "PF400-Z0000-0092Y-6WLMM-6RVX3"
+cryptopro_java_csp_version: "5.0.42465"
+crypto_keys:
+  - name: "test02-key"
+    certname: "test02"
+    container: "TEST02"
+    container_id: "test2"
+    alias: 'HDIMAGE\\TEST02.000\F9C9'
+    password: "1234567890"
+
+#JAVA VARS
+openjdk_version: "1.8.0"
+cryptopro_java_csp_jdk: "openjdk_{{openjdk_version}}"
+cryptopro_java_csp_path: "/opt/java-csp/"
+java_jdk_env: "/usr/lib/jvm/java-1.8.0-openjdk"
+java_jdk_env_bin_path: "/usr/bin"

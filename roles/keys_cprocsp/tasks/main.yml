@@ -1,0 +1,57 @@
+---
+- name: Create crypto_keys_user keys dir
+  file:
+    path: "{{crypto_keys_location}}"
+    state: directory
+    mode: "0700"
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+
+- name: Clean ceritifactes
+  command: "/opt/cprocsp/bin/amd64/certmgr -delete -all"
+  become: yes
+  ignore_errors: yes
+  become_user: "{{crypto_keys_user}}"
+
+- name: Download tomcat distr
+  get_url:
+    url: "{{local_repo}}TEST02.zip"
+    dest: /tmp
+
+- name: Extract cryptopro_java_csp archive
+  unarchive: copy=no src="/tmp/TEST02.zip" dest="{{crypto_keys_location}}"
+
+- name: Fix permissions on directory
+  file:
+    path: "{{crypto_keys_location}}/{{item.container}}"
+    state: directory
+    recurse: yes
+    owner: "{{crypto_keys_user}}"
+    group: "{{crypto_keys_user}}"
+    mode: "u=rwX,g=rX,o=rX"
+  with_items:
+    - "{{crypto_keys}}"
+
+- name: Check certificate existence
+  shell: "test -f {{__cert_file}} || { echo \"File doesn't exist '{{__cert_file}}'\" ; exit 1 ; }"
+  vars:
+    __cert_file: "{{crypto_keys_location}}/{{item.container}}.000/{{item.certname}}.cer"
+  with_items:
+    - "{{crypto_keys}}"
+
+- name: Run cryptopro command to create key-cert link
+  shell: >
+    sudo -u tomcat /opt/cprocsp/bin/amd64/certmgr -export -cont 'HDIMAGE\\TEST02.000\F9C9' -dest /tmp/certificate.crt
+
+- name: Run cryptopro command to create key-cert link
+  shell: >
+    sudo -u tomcat /opt/cprocsp/bin/amd64/certmgr -inst -cont 'HDIMAGE\\TEST02.000\F9C9' -file /tmp/certificate.crt
+
+- name: Register certmgr -list result
+  command: "/opt/cprocsp/bin/amd64/certmgr -list"
+  become: yes
+  become_user: "{{crypto_keys_user}}"
+  register: result
+
+- name: Print certmgr output
+  debug: var=result

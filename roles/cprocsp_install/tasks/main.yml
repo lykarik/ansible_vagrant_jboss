@@ -1,0 +1,31 @@
+---
+- name: Download CryptoPRO distr
+  get_url:
+     url: "{{local_repo}}linux-amd64.tgz"
+     dest: /tmp
+
+- name: Unzip CryptoPro distr
+  unarchive: copy=no src="/tmp/linux-amd64.tgz" dest="/tmp"
+
+- name: Run CryptoPro install script
+  shell: >
+    sh /tmp/linux-amd64/install.sh
+
+- name: Disable notifications about GOST 34.10-2012 needed
+  ini_file:
+    path: "/etc/opt/cprocsp/config64.ini"
+    section: Parameters
+    option: "{{item.option}}"
+    value: "{{item.value}}"
+    backup: yes
+  with_items:
+    - { option: "warning_time_gen_2001", value: "ll:131907744000000000" }
+    - { option: "warning_time_sign_2001", value: "ll:131907744000000000" }
+
+- name: Set license keys
+  shell: >
+    /opt/cprocsp/sbin/amd64/cpconfig -license  -view | egrep -q '{{cryptopro_license_keys}}' ||
+    /opt/cprocsp/sbin/amd64/cpconfig -license -set {{cryptopro_license_keys}}
+
+- name: Include -csp_2001_problem.yml- configuration
+  include: csp_2001_problem.yml
