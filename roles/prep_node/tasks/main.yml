@@ -1,22 +1,23 @@
 ---
+#----------Install require software----------
 - name: Install requirements
   yum: name={{ item }} state=installed
   loop:
     - unzip
 #    - java-1.8.0-openjdk-devel.x86_64
 
+#----------Disabling -firewalld- for allow net access----------
 - name: Disabling firewalld service
-  service: name=firewalld state=stopped
+  systemd: name=firewalld state=stopped enabled=no
 
-- name: Remove firewalld from autostart
-  service: name=firewalld enabled=no
-
+#----------Disabling -SELinux- for allow net access-----------
 - name: Disabling SELinux
   lineinfile:
    path: "/etc/selinux/config"
    regexp: '^SELINUX='
    line: SELINUX=disabled
 
+#----------Reboot nodes----------
 - name: Rebooting node
   shell: sleep 5 & reboot now
   async: 1
@@ -29,3 +30,7 @@
     delay: 5
     timeout: 30
   delegate_to: 127.0.0.1
+
+#----------Deliver information about local own repo----------
+- name: Deliver local repo info
+  template: src=local.repo dest=/etc/yum.repos.d/local.repo mode=0755

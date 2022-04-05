@@ -1,6 +1,4 @@
-[task_1]
-node01  ansible_host=192.168.50.10
-node02  ansible_host=192.168.50.20
-
-[ALL_HOSTS:children]
-task_1
+[local-sign]
+#node01 ansible_host=10.32.101.38 ansible_user=vagrant ansible_ssh_private_key_file=/home/rid/.ssh/ansible
+#node02 ansible_host=10.32.101.40 ansible_user=vagrant ansible_ssh_private_key_file=/home/rid/.ssh/ansible
+selsng01 ansible_host=192.168.88.157 ansible_user=vagrant ansible_ssh_private_key_file=/home/vagrant/.ssh/ansib

@@ -1,5 +1,5 @@
 nodes = [
-  { :hostname => 'selsng01', :box => 'centos7-mini' }
+  { :hostname => 'selsng031', :box => 'centos7-mini' }
 ]
 
 Vagrant.configure("2") do |config|
@@ -10,17 +10,16 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.network :public_network, ip: ""
       nodeconfig.vm.provision "shell",
         run: "always",
-        inline: "sudo yum install unzip java-1.8.0-openjdk.x86_64 -y && ip a"
+        inline: "sudo yum install lsb-core-noarch unzip java-1.8.0-openjdk -y && ip a"
 
       nodeconfig.vm.provider :virtualbox do |vb|
         vb.customize [
             "modifyvm", :id,
             "--name", node[:hostname],
-	        "--cpus", "1",
-            "--memory", "1024",
+	        "--cpus", "2",
+            "--memory", "4096",
         ]
       end
     end
   end
 end
-
