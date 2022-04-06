@@ -1,0 +1,189 @@
+---
+- name: print service name
+  debug:
+    msg: "{{amq_service_name}}"
+
+- name: stop amq-service
+  service:
+    name: "{{ amq_service_name }}-service"
+    state: stopped
+  ignore_errors: yes
+
+- name: Kill AMQ process
+  shell: kill -9 $(ps -ef | grep AMQ | grep java | awk '{ printf "%s ", $2 }')
+  ignore_errors: yes
+
+- name: remove {{amq_dir}}
+  file:
+    path: "{{amq_dir}}"
+    state: absent
+
+- name: remove {{data_dir}}
+  file: 
+    path: "{{data_dir}}"
+    state: absent
+
+- name: remove amq-service file
+  file:
+    path: "{{amq_service_name}}-service"
+    state: absent
+
+- name: print version
+  debug:
+    msg: "{{amq_version}}"
+
+- name: create jboss group
+  group: 
+    name: jboss
+    state: present
+    system: yes
+
+- name: create jboss user
+  user:
+    name: jboss
+    group: jboss
+    system: yes
+
+- name: modify limits.conf
+  lineinfile:
+    dest: "/etc/security/limits.conf"
+    line: "{{item.line}}"
+  with_items:
+    - {line: "jboss\tsoft\tnofile\t65536" }
+    - {line: "jboss\thard\tnofile\t65536" }
+    - {line: "jboss\tsoft\tnproc\t16384" }
+    - {line: "jboss\thard\tnproc\t32768" }
+
+- name: create amq directory
+  file:
+    state: directory
+    dest: "{{amq_dir}}"
+    owner: jboss
+    group: jboss
+
+- name: copy jboss-a-mq-{{amq_version}}.redhat.zip to server
+  copy:
+    src: jboss-a-mq-{{amq_version}}.redhat.zip
+    dest: /tmp/jboss-a-mq-{{amq_version}}.redhat.zip
+    owner: jboss
+    group: jboss
+
+- name: extract jboss-a-mq-{{amq_version}}.redhat.zip
+  unarchive:
+    copy: no
+    src: /tmp/jboss-a-mq-{{amq_version}}.redhat.zip
+    dest: "{{amq_dir}}"
+    owner: jboss
+    group: jboss
+
+- name: move files to {{amq_dir}} location
+  shell: "mv {{amq_dir}}/jboss-a-mq-{{amq_version}}.*redhat-*/* {{amq_dir}}"
+
+- shell: "rmdir {{amq_dir}}/jboss-a-mq-{{amq_version}}.*redhat-*"
+  ignore_errors: yes
+
+- name: create data dir
+  file:
+    state: directory
+    dest: "{{data_dir}}"
+    owner: jboss
+    group: jboss
+
+- name: provide users.properties config
+  template:
+    src: "{{amq_version}}/users.properties.j2"
+    dest: "{{amq_dir}}/etc/users.properties"
+    owner: jboss
+    mode: 0644
+  notify: restart amq
+
+- name: modify start script
+  replace:
+    dest: "{{amq_dir}}/bin/start"
+    regexp: '(\s+)exec(\s+.*)$'
+    replace: '\1nohup\2'
+    backup: yes
+
+- name: provide org.apache.karaf.management.cfg to configure JMX
+  template:
+    src: "{{amq_version}}/{{item}}.j2"
+    dest: "{{amq_dir}}/etc/{{item}}"
+    owner: jboss
+    group: jboss
+  with_items:
+    - org.apache.karaf.management.cfg
+    - org.apache.karaf.shell.cfg
+    - system.properties
+    - jetty.xml
+    - io.fabric8.mq.fabric.server-broker.cfg
+    - org.apache.karaf.jaas.cfg
+    - org.ops4j.pax.logging.cfg
+  notify: restart amq
+
+- name: run amq-service manually
+  shell: "{{amq_dir}}/bin/start"
+  args:
+    chdir: "{{amq_dir}}"
+
+- name: wait for starting amq-service
+  pause:
+    seconds: 60
+
+- name: install amq-service wrapper feature
+  shell: "{{amq_dir}}/bin/client -h localhost -u {{amq_user}} -p {{amq_pass}} -a {{8101+amq_port_offset}} features:install wrapper"
+
+- name: install amq-service wrapper
+  shell: "{{amq_dir}}/bin/client -h localhost -u {{amq_user}} -p {{amq_pass}} -a {{8101+amq_port_offset}} 'wrapper:install -n {{amq_service_name}} -d {{amq_service_name}}'"
+
+- name: stop amq-service manually
+  shell: "{{amq_dir}}/bin/stop"
+  args:
+    chdir: "{{amq_dir}}"
+
+- pause:
+    seconds: 60
+
+- name: provide activemq.xml config
+  template:
+    src: "{{amq_version}}/activemq.xml.j2"
+    dest: "{{amq_dir}}/etc/activemq.xml"
+    owner: jboss
+    mode: 0644
+  notify: restart amq
+
+- name: create init.d script
+  template:
+    src: "{{amq_version}}/amq-service.j2"
+    dest: /etc/init.d/{{amq_service_name}}-service
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create amq-service
+  service:
+    name: "{{amq_service_name}}-service"
+    enabled: yes
+
+- name: fix permissions directory
+  file:
+    path: "{{amq_dir}}"
+    state: directory
+    owner: jboss
+    group: jboss
+    recurse: yes
+
+- name: fix permission data directory
+  file:
+    path: "{{data_dir}}"
+    state: directory
+    owner: jboss
+    group: jboss
+    recurse: yes
+
+- name: provide wrapper config
+  template:
+    src: "{{amq_version}}/amq-wrapper.conf.j2"
+    dest: "{{amq_dir}}/etc/{{amq_service_name}}-wrapper.conf"
+    owner: jboss
+    group: jboss
+  notify: restart amq

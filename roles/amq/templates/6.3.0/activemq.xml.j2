@@ -1,0 +1,165 @@
+<!--
+
+     Copyright 2005-2016 Red Hat, Inc.
+
+     Red Hat licenses this file to you under the Apache License, version
+     2.0 (the "License"); you may not use this file except in compliance
+     with the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+     implied.  See the License for the specific language governing
+     permissions and limitations under the License.
+
+-->
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:amq="http://activemq.apache.org/schema/core"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- Allows us to use system properties and fabric as variables in this configuration file -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <bean class="io.fabric8.mq.fabric.ConfigurationProperties"/>
+        </property>
+    </bean>
+
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="${broker-name}" dataDirectory="${data}" schedulerSupport="true" start="false" restartAllowed="false">
+
+        <destinationPolicy>
+            <policyMap>
+              <policyEntries>
+                <policyEntry topic=">" producerFlowControl="true">
+                  <pendingMessageLimitStrategy>
+                    <constantPendingMessageLimitStrategy limit="1000"/>
+                  </pendingMessageLimitStrategy>
+                </policyEntry>
+                <policyEntry queue="EventManagerMDBQueue" producerFlowControl="true" memoryLimit="2048mb" queuePrefetch="100" maxPageSize="10000" maxBrowsePageSize="10000">
+                    <deadLetterStrategy>
+                        <sharedDeadLetterStrategy>
+                            <deadLetterQueue>
+                                <queue physicalName="DeadLetterIncomingMDBQueue"/>
+                            </deadLetterQueue>
+                        </sharedDeadLetterStrategy>
+                    </deadLetterStrategy>
+                    <networkBridgeFilterFactory>
+                        <conditionalNetworkBridgeFilterFactory replayWhenNoConsumers="true" replayDelay="500"/>
+                    </networkBridgeFilterFactory>
+                </policyEntry>
+                <policyEntry queue=">" producerFlowControl="true" memoryLimit="512mb" queuePrefetch="100" maxPageSize="10000" maxBrowsePageSize="10000">
+                    <deadLetterStrategy>
+                        <sharedDeadLetterStrategy>
+                            <deadLetterQueue>
+                                <queue physicalName="DeadLetterOutgoingMDBQueue"/>
+                            </deadLetterQueue>
+                        </sharedDeadLetterStrategy>
+                    </deadLetterStrategy>
+                    <networkBridgeFilterFactory>
+                        <conditionalNetworkBridgeFilterFactory replayWhenNoConsumers="true" replayDelay="500"/>
+                    </networkBridgeFilterFactory>
+                </policyEntry>
+              </policyEntries>
+            </policyMap>
+        </destinationPolicy>
+
+        <managementContext>
+            <managementContext createConnector="false"/>
+        </managementContext>
+
+        <networkConnectors>
+{% if amq_connections is defined %}
+{% for conn in amq_connections %}
+{% if conn.type == "queue" %}
+            <networkConnector name="{{conn.name}}" uri="static:(tcp://{{conn.host}}:{{conn.port}})" userName="{{conn.user}}" password="{{conn.password}}" suppressDuplicateQueueSubscriptions="true" consumerTTL="1" messageTTL="-1" conduitSubscriptions="false">
+                <dynamicallyIncludedDestinations>
+                    <queue physicalName=">"/>
+                </dynamicallyIncludedDestinations>
+			</networkConnector>
+{% endif %}
+{% if conn.type == "topic" %}
+            <networkConnector name="{{conn.name}}" uri="static:(tcp://{{conn.host}}:{{conn.port}})" userName="{{conn.user}}" password="{{conn.password}}" suppressDuplicateQueueSubscriptions="true" networkTTL="{{conn.ttl}}">
+			    <dynamicallyIncludedDestinations>
+                    <topic physicalName=">"/>
+                </dynamicallyIncludedDestinations>
+			</networkConnector>
+{% endif %}
+{% endfor %}
+{% endif %}
+        </networkConnectors>
+
+        <ioExceptionHandler>
+            <defaultIOExceptionHandler ignoreNoSpaceErrors="false"/>
+        </ioExceptionHandler>
+
+         <persistenceAdapter>
+            <mKahaDB directory="{{data_dir}}">
+               <filteredPersistenceAdapters>
+                   <filteredKahaDB perDestination="true" >
+                      <persistenceAdapter>
+                         <kahaDB journalMaxFileLength="32mb" />
+                      </persistenceAdapter>
+                   </filteredKahaDB>
+               </filteredPersistenceAdapters>
+            </mKahaDB>
+         </persistenceAdapter>
+
+        <plugins>
+		
+            <redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+                <redeliveryPolicyMap>
+                    <redeliveryPolicyMap>
+                        <defaultEntry>
+                            <redeliveryPolicy maximumRedeliveries="5" initialRedeliveryDelay="5000" redeliveryDelay="5000" />
+                        </defaultEntry>
+                    </redeliveryPolicyMap>
+                </redeliveryPolicyMap>
+            </redeliveryPlugin>
+
+            <jaasAuthenticationPlugin configuration="karaf" />
+            <authorizationPlugin>
+              <map>
+                <authorizationMap groupClass="org.apache.karaf.jaas.boot.principal.RolePrincipal">
+                  <!-- manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin,User -->
+                  <authorizationEntries>
+                    <authorizationEntry queue=">" read="manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin" write="manager,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin" admin="manager,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin"/>
+                    <authorizationEntry topic=">" read="manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin" write="manager,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin" admin="manager,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin"/>
+                    <authorizationEntry topic="ActiveMQ.Advisory.>" read="manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin,User" write="manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin,User" admin="manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin,User" />
+                  </authorizationEntries>
+                  <tempDestinationAuthorizationEntry>
+                    <tempDestinationAuthorizationEntry read="manager,viewer,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin" write="manager,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin" admin="manager,Operator,Maintainer,Deployer,Auditor,Administrator,SuperUser,admin"/>
+                  </tempDestinationAuthorizationEntry>
+                </authorizationMap>
+              </map>
+            </authorizationPlugin>
+        </plugins>
+
+        <systemUsage>
+            <systemUsage>
+                <memoryUsage>
+                    <memoryUsage percentOfJvmHeap="{{amq_system.mem_percent}}"/>
+                </memoryUsage>
+                <storeUsage>
+                    <storeUsage limit="{{amq_system.store_limit}} gb"/>
+                </storeUsage>
+                <tempUsage>
+                    <tempUsage limit="{{amq_system.temp_limit}} gb"/>
+                </tempUsage>
+            </systemUsage>
+        </systemUsage>
+
+        <transportConnectors>
+            <transportConnector name="openwire" uri="tcp://0.0.0.0:0?maximumConnections={{amq_system.max_connections}}&amp;wireFormat.maxFrameSize=104857600" updateClusterClients="true"/>
+			<!--
+            <transportConnector name="amqp" uri="amqp://0.0.0.0:0?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="mqtt" uri="mqtt://0.0.0.0:0?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="ws" uri="ws://0.0.0.0:0?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+			-->
+        </transportConnectors>
+    </broker>
+
+</beans>

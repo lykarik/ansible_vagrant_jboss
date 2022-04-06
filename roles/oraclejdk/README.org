@@ -1,0 +1,19 @@
+* Роль oracle
+** Основные функции
+   Установка необходимой версии oraclejdk на стенды с созданием необходимых линков для использования в СПО
+** Описание
+*** Краткое описание
+    Производит установку oraclejdk с последующим накатом указанной версии tzupdate
+
+
+*** Пример конфигурации
+    #+BEGIN_SRC yaml
+      oraclejdk_download_url: "{{oraclejdk_download_url_prefix}}/oraclejdk/{{oraclejdk_major_version}}/{{oraclejdk_archive}}"
+      oraclejdk_tzupdater_download_url: "{{oraclejdk_tzupdater_download_url_prefix}}/tzupdater/{{oraclejdk_tzupdater_archive}}"
+      oraclejdk_tzdata_download_url: "{{oraclejdk_tzdata_download_url_prefix}}/tzdata/{{oraclejdk_tzdata_archive}}"
+      oraclejdk_major_version:     "1.8.0"
+      oraclejdk_minor_version:     "111"
+      oraclejdk_jce_install:       True
+      oraclejdk_tzupdater_version: "2.3.2"
+      oraclejdk_tzdata_version:    "2021a"
+    #+END_SRC

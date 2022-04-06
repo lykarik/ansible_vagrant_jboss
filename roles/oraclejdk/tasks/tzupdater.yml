@@ -1,0 +1,45 @@
+---
+
+- name: set version oraclejdk_tzupdater_path
+  set_fact:
+    oraclejdk_tzupdater_path: "{{oraclejdk_tzupdater_root_path}}/tzupdater-{{oraclejdk_tzupdater_version}}"
+
+- name: create tzupdater tool directory
+  file: state=directory dest={{oraclejdk_tzupdater_root_path}}
+
+- name: Get tzupdater tool
+  include_role:
+    name: get_url_cache
+  vars:
+    get_url_cache: "{{oraclejdk_tzupdater_download_url}}"
+    get_url_cache_checksum: "{{ oraclejdk_tzupdater_version_checksum['v_' + oraclejdk_tzupdater_version] }}"
+    get_url_cache_file: "{{oraclejdk_tzupdater_archive}}"
+
+- name: extract tzupdater-{{oraclejdk_tzupdater_version}}.zip
+  unarchive:
+    src: "{{get_url_cache_path}}/{{oraclejdk_tzupdater_archive}}"
+    # распаковываем в root_path, но внутри архива папка tzupdater-{{oraclejdk_tzupdater_version}}
+    dest: "{{oraclejdk_tzupdater_root_path}}"
+    creates: "{{oraclejdk_tzupdater_path}}/tzupdater.jar"
+    remote_src: yes
+
+- name: create tzdata directory
+  file: state=directory dest={{oraclejdk_tzdata_root_path}}
+
+- name: Get tzdata file
+  include_role:
+    name: get_url_cache
+  vars:
+    get_url_cache: "{{oraclejdk_tzdata_download_url}}"
+    get_url_cache_checksum: "{{ oraclejdk_tzdata_version_checksum['v_' + oraclejdk_tzdata_version] }}"
+    get_url_cache_file: "{{oraclejdk_tzdata_archive}}"
+
+- name: Copy tzdata file
+  copy:
+    src: "{{get_url_cache_path}}/{{oraclejdk_tzdata_archive}}"
+    dest: "{{oraclejdk_tzdata_root_path}}"
+    remote_src: "yes"
+
+- name: run timezone-update tool
+  command: "{{oraclejdk_jdk_path}}/bin/java -jar {{oraclejdk_tzupdater_path}}/tzupdater.jar -f -l file://{{oraclejdk_tzdata_root_path}}/{{oraclejdk_tzdata_archive}}"
+

@@ -1,0 +1,24 @@
+---
+
+- block:
+
+  - name: (install-alternatives) Create tmpdir
+    tempfile:
+      state: directory
+    register: tmpdir
+
+  - name: (install-alternatives) Install java oraclejdk alternatives
+    template:
+      src: "install-alternatives-oraclejdk.sh"
+      dest: "{{tmpdir.path}}/install-alternatives-oraclejdk.sh"
+      mode: "755"
+
+  - name: (install-alternatives) Execute install-alternatives-oraclejdk.sh
+    shell: "{{tmpdir.path}}/install-alternatives-oraclejdk.sh"
+
+  always:
+  - name: (install-alternatives) Remove tmpdir
+    file:
+      path: "{{tmpdir.path}}"
+      state: "absent"
+

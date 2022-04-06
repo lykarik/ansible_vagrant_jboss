@@ -1,0 +1,20 @@
+---
+
+oraclejdk_root_path: "/opt/jdk"
+oraclejdk_version: "{{oraclejdk_major_version}}.{{oraclejdk_minor_version}}"
+oraclejdk_name: "java-{{oraclejdk_major_version}}-oraclejdk-{{oraclejdk_version}}"
+oraclejdk_archive: "{{oraclejdk_name}}.tar.gz"
+oraclejdk_jdk_path: "{{oraclejdk_root_path}}/{{oraclejdk_name}}"
+oraclejdk_version_checksum:
+  v_1.8.0.171: "sha256:b6dd2837efaaec4109b36cfbb94a774db100029f98b0d78be68c27bec0275982"
+  v_1.8.0.111: "sha256:187eda2235f812ddb35c352b5f9aa6c5b184d611c2c9d0393afb8031d8198974"
+
+oraclejdk_tzupdater_root_path: "/opt/tzupdater"
+oraclejdk_tzupdater_archive: "tzupdater-{{oraclejdk_tzupdater_version}}.zip"
+oraclejdk_tzupdater_version_checksum:
+  v_2.3.2: "sha256:53edb4d72329268cff1aa10e97d249816abc55ae12cded7f9ca098d02fa587c1"
+
+oraclejdk_tzdata_root_path: "{{oraclejdk_tzupdater_root_path}}/tzdata"
+oraclejdk_tzdata_archive: "tzdata{{oraclejdk_tzdata_version}}.tar.gz"
+oraclejdk_tzdata_version_checksum:
+  v_2021a: "sha256:39e7d2ba08c68cbaefc8de3227aab0dec2521be8042cf56855f7dc3a9fb14e08"

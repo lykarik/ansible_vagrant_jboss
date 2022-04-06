@@ -1,0 +1,7 @@
+---
+- hosts: amq
+  become: yes
+  roles:
+    #- prep_node
+    - oraclejdk
+    - amq

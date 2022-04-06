@@ -1,0 +1,56 @@
+---
+- name: Download jdk distr
+  get_url:
+    url: "{{local_repo}}oracle_jdk.1.8.1_111.gz"
+    dest: /tmp
+
+#- name: Unzip
+#  unarchive: copy=no src="/tmp/jdk-18_linux-x64_bin.tar.gz" dest="{{jdk_folder}}"
+
+- name: remove {{jdk_folder}}
+  file:
+    path: "{{jdk_folder}}"
+    state: absent
+
+- name: create JDK directory
+  file: state=directory dest={{jdk_folder}} recurse=yes
+
+- name: Extract
+  unarchive:
+    src: "/tmp/oracle_jdk.1.8.1_111.gz"
+    dest: "{{jdk_folder}}"
+   # creates: "{{jdk_folder}}/bin/java"
+    remote_src: yes
+    # удаляем верхнеуровневую директорию, которая есть в архиве от oracle
+   # extra_opts: "--strip-components=1"
+
+- name: Correct jdk home
+  shell: "mv -f /opt/jdk/jdk1.8.0_111/* /opt/jdk/"
+
+- name: Provide JAVA_HOME
+  template:
+    src: amq.sh.j2
+    dest: /etc/profile.d/amq.sh
+    mode: 0755
+
+- name: Apply enviroment
+  shell: "source /etc/profile"
+
+- name: create JDK directory
+  file: state=directory dest={{jdk_folder}}/jre/lib/security recurse=yes
+
+- name: install jce
+  copy: src={{item}} dest={{jdk_folder}}/jre/{{item}}
+  with_items:
+    - lib/security/local_policy.jar
+    - lib/security/US_export_policy.jar
+
+- name: Set system certificate as default for oraclejdk
+  file:
+    src: "/etc/pki/java/cacerts"
+    dest: "{{jdk_folder}}/jre/lib/security/cacerts"
+    state: link
+    force: yes
+
+#- name: (Sub-tasks) tzupdater tool
+#  include_tasks: "tzupdater.yml"

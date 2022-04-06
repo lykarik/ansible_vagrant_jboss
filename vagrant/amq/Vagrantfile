@@ -1,0 +1,25 @@
+nodes = [
+  { :hostname => 'amq', :box => 'centos7-mini' }
+]
+
+Vagrant.configure("2") do |config|
+  nodes.each do |node|
+    config.vm.define node[:hostname] do |nodeconfig|
+      nodeconfig.vm.box = node[:box]
+      nodeconfig.vm.hostname = node[:hostname]
+      nodeconfig.vm.network :public_network, ip: ""
+      nodeconfig.vm.provision "shell",
+        run: "always",
+        inline: "sudo yum install unzip -y && ip a" #java-1.8.0-openjdk;lsb-core-noarch
+
+      nodeconfig.vm.provider :virtualbox do |vb|
+        vb.customize [
+            "modifyvm", :id,
+            "--name", node[:hostname],
+	    "--cpus", "2",
+            "--memory", "2048",
+        ]
+      end
+    end
+  end
+end

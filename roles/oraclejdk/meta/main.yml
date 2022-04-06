@@ -1,0 +1,5 @@
+---
+dependencies:
+#  - { role: common }
+#  - { role: vars_project_all }
+#  - { role: java_jdk_env }
